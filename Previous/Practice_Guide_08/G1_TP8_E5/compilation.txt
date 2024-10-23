@@ -1,0 +1,24 @@
+/* ************************************************************
+    * COMPILACIÓN DESDE VISUAL STUDIO CODE *
+   ************************************************************ */
+
+El comando que usamos para compilar el programa desde la línea de comandos de Visual Studio Code en Windows fue
+
+    $ gcc -g -Wall main.c Front_End/get_input.c Back_End/calc_gen.c Back_End/print_grid.c -o Game_of_Life.exe
+
+Mientras que el comando para ejecutar el programa fue
+
+    $ ./Game_of_Life.exe
+
+
+/* ************************************************************
+    * COMPILACIÓN DESDE TERMINAL DE LINUX *
+   ************************************************************ */
+
+Para compilar desde la terminal de Linux, habría que usar el siguiente comando:
+
+    $ gcc -g -Wall main.c Front_End/get_input.c Back_End/calc_gen.c Back_End/print_grid.c -o Game_of_Life
+
+Similarmente, el comando para ejecutar el programa sería:
+
+    $ ./Game_of_Life
