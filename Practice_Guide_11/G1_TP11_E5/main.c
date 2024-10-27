@@ -113,6 +113,7 @@ int main(void)
     /* ------------------ DISPLAY AND UPDATE ------------------ */
     while(numero != -1)
     {
+    	numero = 0;
         al_wait_for_event(event_queue, &ev);
 
         if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
@@ -124,7 +125,7 @@ int main(void)
             }
 
             // If the key pressed is the ENTER key, display the number of generations entered
-            if (numero != -1) 
+            if (numero >= 0 && numero <= 9) 
             {
                 // Initialize generation counter at 0 and increase by 1 after displaying each generation, until reaching the total number of generations
                 for(current_gen = 0; current_gen < numero; current_gen++)
