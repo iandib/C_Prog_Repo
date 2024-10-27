@@ -25,11 +25,6 @@
 // Set up cell size for display
 #define CELL_SIZE 40
 
-// Set up colors for display
-#define GRID_COLOR al_map_rgb(200, 200, 200)
-#define ALIVE_COLOR al_map_rgb(50, 205, 50)
-#define DEAD_COLOR al_map_rgb(0, 0, 0)
-
 // Display dimensions based on the grid size
 #define DISPLAY_WIDTH (WIDTH * CELL_SIZE)
 #define DISPLAY_HEIGHT (HEIGHT * CELL_SIZE)
