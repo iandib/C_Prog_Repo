@@ -16,6 +16,11 @@
 // Librería para usar la función time() como semilla de rand()
 #include <time.h>
 
+// Librería para usar allegro
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_image.h>
+
 /* --------------- LLAMADA A HEADERS --------------- */
 
 // Header correspondiente al archivo que recibe y procesa el input del usuario
@@ -36,6 +41,12 @@ int main(void)
 
     // Llamamos a la función srand con la semilla time para generar números "aleatorios"
     srand(time(NULL));
+
+    al_init();
+    al_install_keyboard();
+
+    ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
 
     // Definimos un arrary para la retícula actual y otro para la retícula siguiente
     int current_grid[HEIGHT][WIDTH] = {0};
@@ -59,37 +70,58 @@ int main(void)
         // Inicializamos esa posición aleatoria con una célula viva
         current_grid[cell_row][cell_col] = 1;
     }
-
-    // Definimos una variable que guardará el número total de generaciones que quiere ejecutar el usuario
-    int total_gens;
     
     // Definimos una variable que contará el número de generaciones que se van ejecutando (desde el input del usuario)
     int current_gen;
+    int numero = 0;
 
     /* --------------- IMPRESIÓN DE LA RETÍCULA --------------- */
     
     // Imprimimos la generación actual hasta que el usuario presione 'q' (o 'Q') para salir o cualquier caracter inválido
-    while(((total_gens = read_user_input()) != EXIT_REQUEST) && syntax_error == false)
+    while(numero != -1)
     {
-        /* Inicializamos el contador de generaciones en 0 y lo aumentamos en 1 al terminar de imprimir cada generación,
-        hasta imprimir todas las generaciones que indicó el usuario */  
-        for(current_gen = 0; current_gen < total_gens; current_gen++)
-        {
-            // Imprimimos la retícula correspondiente a la generación actual
-            print_grid(current_grid);
+        ALLEGRO_EVENT ev;
+        al_wait_for_event(event_queue, &ev);
 
-            // Hacemos dos saltos de línea para separar las generaciones
-            printf("\n \n");
+        if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
+            int numero = -1;
 
-            /* --------------- ACTUALIZACIÓN DE LA RETÍCULA --------------- */
+            // Detectar número presionado (0-9)
+            if (ev.keyboard.keycode >= ALLEGRO_KEY_0 && ev.keyboard.keycode <= ALLEGRO_KEY_9) {
+                numero = ev.keyboard.keycode - ALLEGRO_KEY_0;  // Convertir a número 0-9
+            }
 
-            // Calculamos cómo se verá la retícula de la siguiente generación
-            next_generation(current_grid, next_grid);
+            if (numero != -1) {
+                /* Inicializamos el contador de generaciones en 0 y lo aumentamos en 1 al terminar de imprimir cada generación,
+                hasta imprimir todas las generaciones que indicó el usuario */  
+                for(current_gen = 0; current_gen < numero; current_gen++)
+                {
+                    // Imprimimos la retícula correspondiente a la generación actual
+                    print_grid(current_grid);
 
-            // Copiamos la retícula de la siguiente generación en la retícula actual
-            copy_grid(current_grid, next_grid);
+                    // Hacemos dos saltos de línea para separar las generaciones
+                    printf("\n \n");
+
+                    /* --------------- ACTUALIZACIÓN DE LA RETÍCULA --------------- */
+
+                    // Calculamos cómo se verá la retícula de la siguiente generación
+                    next_generation(current_grid, next_grid);
+
+                    // Copiamos la retícula de la siguiente generación en la retícula actual
+                    copy_grid(current_grid, next_grid);
+                }
+            }
+
+            // Cerrar si se presiona ESC
+            if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                numero = -1;
+            }
         }
     }
+
+    // Limpiar
+    al_destroy_display(display);
+    al_destroy_event_queue(event_queue);
 
     // La función retorna 0 si todo funciona correctamente
     return 0;
