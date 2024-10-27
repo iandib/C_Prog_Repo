@@ -1,135 +1,111 @@
-/* ************************************************************
-    * CONFIGURACIÓN DEL ARCHIVO *
-   ************************************************************ */
+/* *****************************************************************
+    *                     FILE CONFIGURATION                      *
+   ***************************************************************** */
 
-/* --------------- LLAMADA A HEADERS --------------- */
+/* ---------------------- NECESSARY HEADERS ------------------------ */
 
-// Header correspondiente al archivo actual
+// Header corresponding to the current file
 #include "calc_gen.h"
 
-/* --------------- PROTOTIPOS DE FUNCIONES --------------- */
+/* ----------------- PRIVATE FUNCTIONS PROTOTYPES ----------------- */
 
-// La función cuenta cuántos vecinos vivos tiene la célula en la posición (row, col) de la generación actual
-static int count_live_neighbors(int grid[HEIGHT][WIDTH], int row, int col);
+// Function counts how many alive neighbors the cell at (row, col) in the current generation has
+static int count_alive_neib(int grid[HEIGHT][WIDTH], int row, int col);
 
 
-/* ************************************************************
-    * FUNCIÓN PARA CALCULAR LA SIGUIENTE GENERACIÓN *
-   ************************************************************ */
+/* *****************************************************************
+    *                  NEXT GENERATION FUNCTION                   *
+   ***************************************************************** */
 
-// La función calcula la siguiente generación que debe imprimirse a partir de la generación actual y de las reglas del juego
-void next_generation(int current_grid[HEIGHT][WIDTH], int next_grid[HEIGHT][WIDTH])
+// Function calculates the next generation to be displayed based on the current generation and the game rules
+void next_gen(int current_grid[HEIGHT][WIDTH], int next_grid[HEIGHT][WIDTH])
 {
-    // --------------- ANÁLISIS DE TODAS LAS POSICIONES EN LA RETÍCULA ---------------
-
-    /* Inicializamos un contador de filas en 0 y lo aumentamos en 1 al terminar de recorrer cada fila, hasta llegar a la 
-    fila HEIGHT-1 */
+    // Initialize row counter at 0 and increase by 1 after each row, until reaching 'HEIGHT - 1'
     for(int row = 0; row < HEIGHT; row++)
     {
-        /* Inicializamos un contador de columnas en 0 y lo aumentamos en 1 al recorrer cada posición en una misma fila, 
-        hasta llegar a la posición WIDTH-1 */
+        // Initialize column counter at 0 and increase by 1 after each position in the same row, until reaching 'WIDTH - 1'
         for(int col = 0; col < WIDTH; col++)
         {
-            // Contamos cuántos vecinos vivos tiene la célula en la posición (row, col)
-            int live_neighbors = count_live_neighbors(current_grid, row, col);
+            // Count how many alive neighbors the cell at (row, col) has
+            int alive_neib = count_alive_neib(current_grid, row, col);
 
-            // --------------- APLICACIÓN DE LAS REGLAS DEL JUEGO ---------------
-
-            // Si la célula en la posición (row, col) está viva (su valor es 1)
+            // If the cell at (row, col) is alive
             if(current_grid[row][col] == 1)
             {
-                // Si tiene menos de 2 vecinos vivos, muere por subpoblación (su valor pasa a ser 0)
-                if(live_neighbors < 2)
-                {
-                    next_grid[row][col] = 0;
-                }
-
-                // Si tiene más de 3 vecinos vivos, muere por sobrepoblación (su valor pasa a ser 0)
-                else if(live_neighbors > 3)
-                {
-                    next_grid[row][col] = 0;
-                }
-
-                // Si tiene exactamente 2 o 3 vecinos, sobrevive (su valor se mantiene en 1)
-                else
-                {
-                    next_grid[row][col] = 1;
-                }
+                // Determines if the cell dies or survives based on the number of alive neighbors
+                next_grid[row][col] = (alive_neib < 2 || alive_neib > 3) ? 0 : 1;
             }
 
-            // Si, en cambio, la posición (row, col) está vacía (su valor es 0)
+            // If the position (row, col) is empty
             else
             {
-                // Si tiene exactamente 3 vecinos, nace una célula (su valor pasa a ser 1)
-                if(live_neighbors == 3)
-                {
-                    next_grid[row][col] = 1;
-                }
-
-                // En cualquier otro caso, la posición sigue vacía (su valor se mantiene en 0)
-                else
-                {
-                    next_grid[row][col] = 0;
-                }
+                // If it has exactly 3 neighbors, a cell is born; otherwise, it remains empty
+                next_grid[row][col] = (alive_neib == 3) ? 1 : 0;
             }
         }
     }
 
-    // No es necesario que la función retorne las actualizaciones porque estas ya se guardan en el array original
+    // Function does not return a value
     return;
 }
 
 
-/* ************************************************************
-    * FUNCIÓN PARA CONTAR LOS VECINOS VIVOS DE UNA CÉLULA *
-   ************************************************************ */
+/* *****************************************************************
+    *                    ALIVE CELLS FUNCTION                     *
+   ***************************************************************** */
 
-// La función cuenta cuántos vecinos vivos tiene la célula en la posición (row, col) de la retícula actual
-static int count_live_neighbors(int grid[HEIGHT][WIDTH], int row, int col)
+// Function counts how many alive neighbors the cell at (row, col) in the current grid has
+static int count_alive_neib(int grid[HEIGHT][WIDTH], int row, int col)
 {
-    // Definimos una variable que almacenará el número de vecinos vivos
-    int live_neighbors = 0;
+    /* ------------------- LOCAL VARIABLES ------------------- */
 
-    // Definimos una variable que almacenará el desplazamiento en una misma columna desde la posición (row, col)
-    int row_displacement;
+    // Number of alive neighbors
+    int alive_neib = 0;
 
-    // Definimos una variable que almacenará el desplazamiento en una misma fila desde la posición (row, col)
-    int col_displacement;
+    // Row displacement from the position (row, col)
+    int row_dispm;
 
-    // --------------- ANÁLISIS DE ÁREA (3X3) ALREDEDOR DE LA CÉLULA ---------------
+    // Column displacement from the position (row, col)
+    int col_dispm;
 
-    // Recorremos las tres columnas que van desde 1 lugar a la izquierda de (row, col) hasta 1 lugar a su derecha
-    for(row_displacement = -1; row_displacement <= 1; row_displacement++)
+    // Flag to check if the neighboring cell is within the grid boundaries
+    bool in_bounds = false;
+
+    /* ----------------------- UPDATE ----------------------- */
+
+    // Iterate through the three columns from 1 place to the left of (row, col) to 1 place to its right
+    for(row_dispm = -1; row_dispm <= 1; row_dispm++)
     {
-        // Y repetimos lo anterior para las tres filas que van desde 1 lugar abajo de (row, col) hasta 1 lugar arriba suyo
-        for(col_displacement = -1; col_displacement <= 1; col_displacement++)
+        // Reset in_bounds to false at the beginning of each row_dispm iteration
+        in_bounds = false;
+
+        // Repeat for the three rows from 1 place below (row, col) to 1 place above it
+        for(col_dispm = -1; col_dispm <= 1; col_dispm++)
         {
-            // Si estamos en la posición actual (la célula misma), la omitimos
-            if(row_displacement == 0 && col_displacement == 0)
+            // If we are at the the cell itself, skip it
+            if(row_dispm == 0 && col_dispm == 0)
             {
                 continue;
             }
 
-            // --------------- CONTADOR DE CÉLULAS VIVAS ---------------
+            // Calculate the coordinates of each neighboring cell (updated with each value of x and y in the 3x3 loop)
+            int neigb_row = row + row_dispm;
+            int neigb_col = col + col_dispm;
 
-            // Calculamos las coordenadas de cada célula vecina (se actualiza con cada valor de x e y en el recorrido de 3x3)
-            int neighbor_row = row + row_displacement;
-            int neighbor_col = col + col_displacement;
-
-            /* Verificamos si las coordenadas de la célula vecina están dentro de los límites de la retícula (desde la posición 0
-            hasta la posición N-1) */
-            if((neighbor_row >= 0) && (neighbor_row < HEIGHT) && (neighbor_col >= 0) && (neighbor_col < WIDTH))
+            // If the neighboring cell is within the grid boundaries, set the flag to true
+            if((neigb_row >= 0) && (neigb_row < HEIGHT) && (neigb_col >= 0) && (neigb_col < WIDTH))
             {
-                /* Si la célula vecina está viva (el valor de la posición (neighbor_row, neighbor_col) de la retícula es 1), 
-                aumentamos el contador de células vivas en 1 */
-                if(grid[neighbor_row][neighbor_col] == 1)
-                {
-                    live_neighbors++;
-                }
+                in_bounds = true;
+            }
+
+            // If the neighboring cell is within bounds and is alive, increase the counter of alive neighbors
+            if(in_bounds && grid[neigb_row][neigb_col] == 1)
+            {
+                alive_neib++;
             }
         }
     }
 
-    // Retornamos el número total de vecinos vivos
-    return live_neighbors;
+    // Function returns the total number of alive neighbors
+    return alive_neib;
 }

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "print_grid.h": "c",
+        "display_grid.h": "c",
+        "time.h": "c"
+    }
+}

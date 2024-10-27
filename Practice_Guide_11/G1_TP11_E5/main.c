@@ -1,97 +1,109 @@
-/* ************************************************************
-    * CONFIGURACIÓN DEL ARCHIVO *
-   ************************************************************ */
+/* *****************************************************************
+    *                     FILE CONFIGURATION                      *
+   ***************************************************************** */
 
-/* --------------- LIBRERÍAS UTILIZADAS --------------- */
+/* --------------------- NECESSARY LIBRARIES --------------------- */
 
-// Librería estándar de entrada y salida en C
+// Standard Input/Output library
 #include <stdio.h>
 
-// Librería para trabajar con booleanos (verdadero y falso)
+// Boolean library
 #include <stdbool.h>
 
-// Librería para usar la función rand()
+// Random number generation library
 #include <stdlib.h>
 
-// Librería para usar la función time() como semilla de rand()
+// Time library for random number generation
 #include <time.h>
 
-/* --------------- LLAMADA A HEADERS --------------- */
+/* ---------------------- NECESSARY HEADERS ------------------------ */
 
-// Header correspondiente al archivo que recibe y procesa el input del usuario
+// Header corresponding to the file that receives and processes user input
 #include "Front_End/get_input.h"
 
-// Header correspondiente al archivo que imprime la retícula actual
-#include "Back_End/print_grid.h"
+// Header corresponding to the file that displays the current grid using Allegro
+#include "Back_End/display_grid.h"
 
 
-/* ************************************************************
-    * FUNCIÓN PRINCIPAL *
-   ************************************************************ */
+/* *****************************************************************
+    *                      MAIN FUNCTION                          *
+   ***************************************************************** */
 
-// La función principal imprime los mensajes en pantalla y llama a las otras funciones
+// Function displays messages on the screen and calls other functions
 int main(void)
 {
-    /* --------------- INICIALIZACIÓN DE LA RETÍCULA --------------- */
+    /* ------------------- LOCAL VARIABLES ------------------- */
 
-    // Llamamos a la función srand con la semilla time para generar números "aleatorios"
-    srand(time(NULL));
-
-    // Definimos un arrary para la retícula actual y otro para la retícula siguiente
+    // Arrays for the current and next grids
     int current_grid[HEIGHT][WIDTH] = {0};
     int next_grid[HEIGHT][WIDTH] = {0};
 
-    // Definimos dos variables para ubicar a las células en el array correspondiente a la retícula
+    // Variables to store the row and column of the cell being analyzed
     int cell_row;
     int cell_col;
 
-    // Definimos una variable para guardar la cantidad aleatoria de células vivas que habrá al inicio
+    // Random number of alive cells at the start of the game
     int alive_cells = (rand() % (HEIGHT * WIDTH));
 
-    /* Inicializamos un contador de células vivas en 0 y lo aumentamos en 1 al iniciar una célula como viva, hasta llegar a la 
-    cantidad aleatoria calculada anteriormente */
+    // Total number of generations to be displayed
+    int total_gens;
+
+    // Number of the current generation displayed
+    int current_gen;
+
+    /* -------------------- INITIALIZATION -------------------- */
+
+    // Seed the random number generator
+    srand(time(NULL));
+
+    // Initialize alive cells counter at 0 and increase by 1 after starting each alive cell, until reaching the random amount
     for(int alive_cells_count = 0; alive_cells_count < alive_cells; alive_cells_count++)
     {
-        // Nos ubicamos en una fila y columna aleatoria
+        // Generate random row and column for the cell
         cell_row = (rand() % HEIGHT);
         cell_col = (rand() % WIDTH );
 
-        // Inicializamos esa posición aleatoria con una célula viva
+        // Initialize the current position with a living cell
         current_grid[cell_row][cell_col] = 1;
     }
 
-    // Definimos una variable que guardará el número total de generaciones que quiere ejecutar el usuario
-    int total_gens;
-    
-    // Definimos una variable que contará el número de generaciones que se van ejecutando (desde el input del usuario)
-    int current_gen;
+    // Initialize Allegro and create a display
+    if(!al_init())
+    {
+        fprintf(stderr, "Failed to initialize Allegro \n");
+        return -1;
+    }
 
-    /* --------------- IMPRESIÓN DE LA RETÍCULA --------------- */
+    ALLEGRO_DISPLAY *display = al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    if(!display)
+    {
+        fprintf(stderr, "Failed to create display \n");
+        return -1;
+    }
+
+    /* ------------------ DISPLAY AND UPDATE ------------------ */
     
-    // Imprimimos la generación actual hasta que el usuario presione 'q' (o 'Q') para salir o cualquier caracter inválido
+    // Display the current generation until the user presses 'q' (or 'Q') to exit or any invalid character
     while(((total_gens = read_user_input()) != EXIT_REQUEST) && syntax_error == false)
     {
-        /* Inicializamos el contador de generaciones en 0 y lo aumentamos en 1 al terminar de imprimir cada generación,
-        hasta imprimir todas las generaciones que indicó el usuario */  
+        // Initialize generation counter at 0 and increase by 1 after displaying each generation, until reaching the total number of generations
         for(current_gen = 0; current_gen < total_gens; current_gen++)
         {
-            // Imprimimos la retícula correspondiente a la generación actual
-            print_grid(current_grid);
+            // Display the grid corresponding to the current generation using Allegro
+            display_grid(display, current_grid);
 
-            // Hacemos dos saltos de línea para separar las generaciones
-            printf("\n \n");
+            // Calculate the next generation based on the current generation
+            next_gen(current_grid, next_grid);
 
-            /* --------------- ACTUALIZACIÓN DE LA RETÍCULA --------------- */
-
-            // Calculamos cómo se verá la retícula de la siguiente generación
-            next_generation(current_grid, next_grid);
-
-            // Copiamos la retícula de la siguiente generación en la retícula actual
+            // Copy the grid of the next generation into the current grid
             copy_grid(current_grid, next_grid);
         }
     }
 
-    // La función retorna 0 si todo funciona correctamente
-    return 0;
-}
+    // Destroy the display after use
+    al_destroy_display(display);
 
+    // Function returns 0 if everything works correctly
+    return 0;
+
+}
