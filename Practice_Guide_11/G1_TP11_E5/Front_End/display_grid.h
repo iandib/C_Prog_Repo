@@ -18,7 +18,7 @@
 /* ---------------------- NECESSARY HEADERS ------------------------ */
 
 // Header corrisponding to the file that calculates the next generation of the game
-#include "calc_gen.h"
+#include "../Back_End/calc_gen.h"
 
 /* ---------------------- MACROS & CONSTANTS ---------------------- */
 

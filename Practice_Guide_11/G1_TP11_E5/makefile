@@ -18,15 +18,13 @@ EXEC := GoL
 
 # Archivos fuente
 SRCS := main.c \
-        Front_End/get_input.c \
         Back_End/calc_gen.c \
-        Back_End/display_grid.c
+        Front_End/display_grid.c
 
 # Archivos objeto
 OBJS := main.o \
-		Front_End/get_input.o \
 		Back_End/calc_gen.o \
-		Back_End/display_grid.o
+		Front_End/display_grid.o
 
 # --------------- REGLAS DE COMPILACIÓN ---------------
 
@@ -35,17 +33,14 @@ ${EXEC}: ${OBJS}
 	${CC} ${OBJS} ${CFLAGS} ${LDFLAGS} -o ${EXEC}
 
 # Regla para generar cada archivo objeto
-main.o: main.c Front_End/get_input.h Back_End/display_grid.h Back_End/calc_gen.h
+main.o: main.c Back_End/calc_gen.h Front_End/display_grid.h
 	${CC} ${CFLAGS} -c main.c -o main.o
-
-Front_End/get_input.o: Front_End/get_input.c Front_End/get_input.h
-	${CC} ${CFLAGS} -c Front_End/get_input.c -o Front_End/get_input.o
 
 Back_End/calc_gen.o: Back_End/calc_gen.c Back_End/calc_gen.h
 	${CC} ${CFLAGS} -c Back_End/calc_gen.c -o Back_End/calc_gen.o
 
-Back_End/display_grid.o: Back_End/display_grid.c Back_End/display_grid.h Back_End/calc_gen.h
-	${CC} ${CFLAGS} -c Back_End/display_grid.c -o Back_End/display_grid.o
+Front_End/display_grid.o: Front_End/display_grid.c Front_End/display_grid.h Back_End/calc_gen.h
+	${CC} ${CFLAGS} -c Front_End/display_grid.c -o Front_End/display_grid.o
 
 # --------------- REGLAS DE LIMPIEZA ---------------
 

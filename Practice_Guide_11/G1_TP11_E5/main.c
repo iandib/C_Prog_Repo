@@ -18,11 +18,8 @@
 
 /* ---------------------- NECESSARY HEADERS ------------------------ */
 
-// Header corresponding to the file that receives and processes user input
-#include "Front_End/get_input.h"
-
 // Header corresponding to the file that displays the current grid using Allegro
-#include "Back_End/display_grid.h"
+#include "Front_End/display_grid.h"
 
 
 /* *****************************************************************
@@ -46,7 +43,7 @@ int main(void)
     int alive_cells = (rand() % (HEIGHT * WIDTH));
 
     // Total number of generations to be displayed
-    int total_gens;
+    //int total_gens;
 
     // Number of the current generation displayed
     int current_gen;
@@ -73,6 +70,11 @@ int main(void)
         fprintf(stderr, "Failed to initialize Allegro \n");
         return -1;
     }
+    if(!al_install_keyboard())
+    {
+        fprintf(stderr, "Failed to initialize Allegro \n");
+        return -1;
+    }
 
     ALLEGRO_DISPLAY *display = al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
     if(!display)
@@ -81,28 +83,49 @@ int main(void)
         return -1;
     }
 
+    ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
+
+    int numero = 0;
+
+    ALLEGRO_EVENT ev;
+
+
     /* ------------------ DISPLAY AND UPDATE ------------------ */
-    
-    // Display the current generation until the user presses 'q' (or 'Q') to exit or any invalid character
-    while(((total_gens = read_user_input()) != EXIT_REQUEST) && syntax_error == false)
+    while(numero != -1)
     {
-        // Initialize generation counter at 0 and increase by 1 after displaying each generation, until reaching the total number of generations
-        for(current_gen = 0; current_gen < total_gens; current_gen++)
-        {
-            // Display the grid corresponding to the current generation using Allegro
-            display_grid(display, current_grid);
+        al_wait_for_event(event_queue, &ev);
 
-            // Calculate the next generation based on the current generation
-            next_gen(current_grid, next_grid);
+        if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
 
-            // Copy the grid of the next generation into the current grid
-            copy_grid(current_grid, next_grid);
+            // Detectar número presionado (0-9)
+            if (ev.keyboard.keycode >= ALLEGRO_KEY_0 && ev.keyboard.keycode <= ALLEGRO_KEY_9) {
+                numero = ev.keyboard.keycode - ALLEGRO_KEY_0;  // Convertir a número 0-9
+            }
+
+            if (numero != -1) {
+                // Initialize generation counter at 0 and increase by 1 after displaying each generation, until reaching the total number of generations
+                for(current_gen = 0; current_gen < numero; current_gen++)
+                {
+                    // Display the grid corresponding to the current generation using Allegro
+                    display_grid(display, current_grid);
+
+                    // Calculate the next generation based on the current generation
+                    next_gen(current_grid, next_grid);
+
+                    // Copy the grid of the next generation into the current grid
+                    copy_grid(current_grid, next_grid);
+                }
+            }
+
+            // Cerrar si se presiona ESC
+            if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+                numero = -1;
+            }
         }
     }
-
     // Destroy the display after use
     al_destroy_display(display);
-
     // Function returns 0 if everything works correctly
     return 0;
 
