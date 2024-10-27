@@ -42,11 +42,10 @@ int main(void)
     // Random number of alive cells at the start of the game
     int alive_cells = (rand() % (HEIGHT * WIDTH));
 
-    // Total number of generations to be displayed
-    //int total_gens;
-
     // Number of the current generation displayed
     int current_gen;
+
+    ALLEGRO_DISPLAY * display = NULL;
 
     /* -------------------- INITIALIZATION -------------------- */
 
@@ -64,22 +63,25 @@ int main(void)
         current_grid[cell_row][cell_col] = 1;
     }
 
-    // Initialize Allegro and create a display
-    if(!al_init())
+    // Attempt to initialize Allegro; if failed, return -1
+    if (!al_init())
     {
-        fprintf(stderr, "Failed to initialize Allegro \n");
-        return -1;
-    }
-    if(!al_install_keyboard())
-    {
-        fprintf(stderr, "Failed to initialize Allegro \n");
+        fprintf(stderr, "failed to initialize allegro!\n");
         return -1;
     }
 
-    ALLEGRO_DISPLAY *display = al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    if(!display)
+    // Attempt to create display of 'WIDTH' x 'HEIGHT'; if failed, return NULL
+    display = al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT); 
+    if (!display)
     {
-        fprintf(stderr, "Failed to create display \n");
+        fprintf(stderr, "failed to create display!\n");
+        return -1;
+    }
+
+    // ???
+    if(!al_install_keyboard())
+    {
+        fprintf(stderr, "Failed to initialize Allegro \n");
         return -1;
     }
 
@@ -124,8 +126,10 @@ int main(void)
             }
         }
     }
+
     // Destroy the display after use
     al_destroy_display(display);
+
     // Function returns 0 if everything works correctly
     return 0;
 

@@ -23,7 +23,7 @@
 /* ---------------------- MACROS & CONSTANTS ---------------------- */
 
 // Set up cell size for display
-#define CELL_SIZE 20
+#define CELL_SIZE 40
 
 // Set up colors for display
 #define GRID_COLOR al_map_rgb(200, 200, 200)

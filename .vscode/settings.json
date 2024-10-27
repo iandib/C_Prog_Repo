@@ -3,6 +3,8 @@
         "print_grid.h": "c",
         "display_grid.h": "c",
         "time.h": "c",
-        "calc_gen.h": "c"
+        "calc_gen.h": "c",
+        "allegro_primitives.h": "c",
+        "stdio.h": "c"
     }
 }

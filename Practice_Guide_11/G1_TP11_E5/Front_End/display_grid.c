@@ -15,20 +15,13 @@
 // Function displays the grid for the current generation using Allegro
 void display_grid(ALLEGRO_DISPLAY *display, int grid[HEIGHT][WIDTH])
 {
-    // Check if the display is valid
-    if (display == NULL)
-    {
-        fprintf(stderr, "Display is NULL \n");
-        return;
-    }
-
     // Begin display updates
     al_clear_to_color(DEAD_COLOR);
 
-    // Initialize row counter at 0 and increase by 1 after each row, until reaching 'HEIGHT - 1'
+    // Initialize row counter at 0 and increase by 1 after each row, until reaching 'HEIGHT'
     for(int row = 0; row < HEIGHT; row++)
     {
-        // Initialize column counter at 0 and increase by 1 after each position in the same row, until reaching 'WIDTH - 1'
+        // Initialize column counter at 0 and increase by 1 after each position in the same row, until reaching 'WIDTH'
         for(int col = 0; col < WIDTH; col++)
         {
             // Calculate x and y coordinates based on cell size
@@ -52,6 +45,8 @@ void display_grid(ALLEGRO_DISPLAY *display, int grid[HEIGHT][WIDTH])
             al_draw_rectangle(x, y, x + CELL_SIZE, y + CELL_SIZE, GRID_COLOR, 1);
         }
     }
+
+    al_rest(0.5);
 
     // Refresh display to show updated grid
     al_flip_display();
