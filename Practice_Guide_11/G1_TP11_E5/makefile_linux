@@ -8,10 +8,10 @@
 CC := gcc
 
 # Compilator flags
-CFLAGS := -g -Wall -I/mingw64/include
+CFLAGS := -g -Wall -I/usr/include
 
 # Linker flags
-LDFLAGS := -L/mingw64/lib -lallegro -lallegro_primitives -lallegro_image -lallegro_font -lallegro_ttf
+LDFLAGS := -L/usr/lib -lallegro -lallegro_primitives -lallegro_image -lallegro_font -lallegro_ttf
 
 # Executable name
 EXEC := GoL
