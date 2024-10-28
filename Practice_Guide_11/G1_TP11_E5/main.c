@@ -1,4 +1,26 @@
 /* *****************************************************************
+    *                        INFORMATION                          *
+   ***************************************************************** 
+   
+    * @file main.c
+    * @brief Game of Life implementation using Allegro
+    * @version 1.0
+    * @date 2021-05-26
+    * @compiler GCC
+    * @editor VSCode
+    * @OS Windows
+   
+   El número de generaciones que se quiere avanzar se introduce por teclado, directamente en la ventana de la aplicación, 
+   y debe ser de un solo dígito porque no requiere Enter para confirmar.
+   Al ingresar 'Esc' se cierra la aplicación.
+
+   Observación: Hay dos makefiles, uno para compilar en Windows y otro para compilar en Linux. Lo único que cambia es la
+   ubicación de la biblioteca/librería de Allegro.
+   
+*/
+
+
+/* *****************************************************************
     *                     FILE CONFIGURATION                      *
    ***************************************************************** */
 
@@ -113,6 +135,10 @@ int main(void)
     /* ------------------ DISPLAY AND UPDATE ------------------ */
     while(numero != -1)
     {
+        // Reset the number pressed by the user
+        numero = 0;
+        
+        // Wait for an event to occur
         al_wait_for_event(event_queue, &ev);
 
         if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
@@ -124,7 +150,7 @@ int main(void)
             }
 
             // If the key pressed is the ENTER key, display the number of generations entered
-            if (numero != -1) 
+            if (numero >= 0 && numero <= 9) 
             {
                 // Initialize generation counter at 0 and increase by 1 after displaying each generation, until reaching the total number of generations
                 for(current_gen = 0; current_gen < numero; current_gen++)
@@ -153,5 +179,4 @@ int main(void)
 
     // Function returns 0 if everything works correctly
     return 0;
-
 }
