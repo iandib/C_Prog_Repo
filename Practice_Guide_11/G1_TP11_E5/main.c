@@ -1,4 +1,26 @@
 /* *****************************************************************
+    *                        INFORMATION                          *
+   ***************************************************************** 
+   
+    * @file main.c
+    * @brief Game of Life implementation using Allegro
+    * @version 1.0
+    * @date 2021-05-26
+    * @compiler GCC
+    * @editor VSCode
+    * @OS Windows
+   
+   El número de generaciones que se quiere avanzar se introduce por teclado, directamente en la ventana de la aplicación, 
+   y debe ser de un solo dígito porque no requiere Enter para confirmar.
+   Al ingresar 'Esc' se cierra la aplicación.
+
+   Observación: Hay dos makefiles, uno para compilar en Windows y otro para compilar en Linux. Lo único que cambia es la
+   ubicación de la biblioteca/librería de Allegro.
+   
+*/
+
+
+/* *****************************************************************
     *                     FILE CONFIGURATION                      *
    ***************************************************************** */
 
@@ -16,13 +38,14 @@
 // Time library for random number generation
 #include <time.h>
 
+// Allegro library for graphics
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
+
 /* ---------------------- NECESSARY HEADERS ------------------------ */
 
-// Header corresponding to the file that receives and processes user input
-#include "Front_End/get_input.h"
-
 // Header corresponding to the file that displays the current grid using Allegro
-#include "Back_End/display_grid.h"
+#include "Front_End/display_grid.h"
 
 
 /* *****************************************************************
@@ -45,11 +68,11 @@ int main(void)
     // Random number of alive cells at the start of the game
     int alive_cells = (rand() % (HEIGHT * WIDTH));
 
-    // Total number of generations to be displayed
-    //int total_gens;
-
     // Number of the current generation displayed
     int current_gen;
+
+    // Set up Allegro display pointer
+    ALLEGRO_DISPLAY * display = NULL;
 
     /* -------------------- INITIALIZATION -------------------- */
 
@@ -67,46 +90,68 @@ int main(void)
         current_grid[cell_row][cell_col] = 1;
     }
 
-    // Initialize Allegro and create a display
-    if(!al_init())
+    /* ---------------- ALLEGRO INITIALIZATION ---------------- */
+
+    // Attempt to initialize Allegro; if failed, return -1
+    if (!al_init())
     {
-        fprintf(stderr, "Failed to initialize Allegro \n");
+        fprintf(stderr, "failed to initialize allegro!\n");
         return -1;
     }
+
+    // Attempt to initialize Allegro primitives addon; if failed, return -1
+    if(!al_init_primitives_addon())
+    {
+        fprintf(stderr, "Failed to initialize Allegro primitives addon\n");
+        return -1;
+    }
+
+    // Attempt to create display of 'WIDTH' x 'HEIGHT'; if failed, return -1
+    display = al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT); 
+    if (!display)
+    {
+        fprintf(stderr, "failed to create display!\n");
+        return -1;
+    }
+
+    // Attempt to install keyboard; if failed, return -1
     if(!al_install_keyboard())
     {
         fprintf(stderr, "Failed to initialize Allegro \n");
         return -1;
     }
 
-    ALLEGRO_DISPLAY *display = al_create_display(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    if(!display)
-    {
-        fprintf(stderr, "Failed to create display \n");
-        return -1;
-    }
-
+    // Create event queue for keyboard events
     ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_keyboard_event_source());
 
-    int numero = 0;
-
+    // Variable to store the event
     ALLEGRO_EVENT ev;
+
+        // Variable to store the number pressed by the user
+    int numero = 0;
 
 
     /* ------------------ DISPLAY AND UPDATE ------------------ */
     while(numero != -1)
     {
+        // Reset the number pressed by the user
+        numero = 0;
+        
+        // Wait for an event to occur
         al_wait_for_event(event_queue, &ev);
 
-        if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
-
-            // Detectar número presionado (0-9)
-            if (ev.keyboard.keycode >= ALLEGRO_KEY_0 && ev.keyboard.keycode <= ALLEGRO_KEY_9) {
-                numero = ev.keyboard.keycode - ALLEGRO_KEY_0;  // Convertir a número 0-9
+        if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+        {
+            // If the key pressed is a number, convert it to a number 0-9
+            if ((ev.keyboard.keycode >= ALLEGRO_KEY_0) && (ev.keyboard.keycode <= ALLEGRO_KEY_9))
+            {
+                numero = ev.keyboard.keycode - ALLEGRO_KEY_0;
             }
 
-            if (numero != -1) {
+            // If the key pressed is the ENTER key, display the number of generations entered
+            if (numero >= 0 && numero <= 9) 
+            {
                 // Initialize generation counter at 0 and increase by 1 after displaying each generation, until reaching the total number of generations
                 for(current_gen = 0; current_gen < numero; current_gen++)
                 {
@@ -121,15 +166,17 @@ int main(void)
                 }
             }
 
-            // Cerrar si se presiona ESC
-            if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+            // If the key pressed is the ESC key, exit the program
+            if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+            {
                 numero = -1;
             }
         }
     }
+
     // Destroy the display after use
     al_destroy_display(display);
+
     // Function returns 0 if everything works correctly
     return 0;
-
 }
