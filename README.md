@@ -1,2 +1,2 @@
-# Prog_C
-Repositorio del Grupo 1 para la materia Programación I del ITBA.
+# C_Prog_Repo
+Group 1 Repository for the C Programming Subject at ITBA.
