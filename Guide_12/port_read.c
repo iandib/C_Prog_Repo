@@ -21,6 +21,11 @@
 // Header corresponding to this file
 #include "port_read.h"
 
+/* ------------------- PUBLIC GLOBAL VARIABLES ------------------- */
+
+// Variable to represent the state of port A
+port portA;
+
 
 /* *****************************************************************
     *                    MANAGE PORTS FUNCTION                    *
@@ -31,11 +36,14 @@ void port_read(void)
 {
 	/* ------------------ LOCAL VARIABLES ------------------ */
 	
-	// Variable to represent the state of port A
-	port portA;
-
-	// Array of bit values from the portA structure
+	// Array of bit values from the portA structure, initialized to 0
     uint8_t port_bits[] = {portA.b0, portA.b1, portA.b2, portA.b3, portA.b4, portA.b5, portA.b6, portA.b7};
+
+    // Ensure all values are initialized to 0
+    for (int i = 0; i < 8; i++)
+    {
+        port_bits[i] = 0;
+    }
 
     // File handle for each GPIO pin
 	FILE *handle;

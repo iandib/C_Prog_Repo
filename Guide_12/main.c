@@ -60,7 +60,7 @@ int main(void)
     /* ------------------ INITIALIZATION ------------------ */
 
     // Initialize GPIO pins for LED control
-    initPins();
+    initializePins();
 
     // Set all LEDs to OFF (0) initially
     for(int i = 0; i < 8; i++)
@@ -118,7 +118,7 @@ int main(void)
     }  
 
     // De-initialize GPIO pins after program exit
-    endPins();
+    releasePins();
     
     // Return 0 to indicate successful program completion
     return 0;
