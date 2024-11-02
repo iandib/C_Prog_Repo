@@ -65,24 +65,27 @@ void port_read(void)
             handle = fopen(gpio_paths[i], "w");
             if (handle == NULL)
             {
-                printf("Error al abrir archivo\n");
+                printf("Error: could not open file for pin %d \n", i);
                 exit(1);
             }
 
+            // Print message if the file was opened successfully
             else
             {
-                printf("Archivo %s abierto con exito\n", gpio_paths[i]);
+                printf("File %s opened successfully \n", gpio_paths[i]);
             }
 
             // Write '1' if bit is set, '0' otherwise
             if (fputc(port_bits[i] ? '1' : '0', handle) == -1)
             {
-                printf("Error al prender/apagar pin %d\n", i);
+                printf("Error: could not write to file for pin %d \n", i);
                 exit(1);
             }
+
+            // Print message if the pin was updated successfully
             else
             {
-                printf("Pin %d prendido/apagado\n", i);
+                printf("Pin %d updated successfully \n", i);
             }
             
             // Close the file after updating the pin
