@@ -1,98 +1,125 @@
+/* *****************************************************************
+    *                        INFORMATION                          *
+   ***************************************************************** 
+   
+    * @file main.c
+    * @brief LED Control Program for Raspberry Pi GPIO
+    * @version 2.0
+    * @date 2024-11-02
+    * @compiler GCC
+    * @editor VSCode && Linux
+    * @OS Raspberry Pi OS
+*/
+
+
+/* *****************************************************************
+    *                     FILE CONFIGURATION                      *
+   ***************************************************************** */
+
+/* --------------------- NECESSARY LIBRARIES --------------------- */
+
+// Standard Input/Output library
 #include <stdio.h>
+
+// Standard library for general utilities
 #include <stdlib.h>
+
+/* ---------------------- NECESSARY HEADERS ------------------------ */
+
+// Header for GPIO pin initialization
 #include "hardware.h"
+
+// Header for port read function
 #include "port_read.h"
 
+
+/* ---------------------- EXTERN VARIABLES ------------------------- */
+
+// External port variable to control LED states
 extern port portA;
 
-int main (void)
+
+/* *****************************************************************
+    *                      MAIN FUNCTION                          *
+   ***************************************************************** */
+
+// Function to control LEDs based on user input
+int main(void)
 {
+    /* ------------------ LOCAL VARIABLES ------------------ */
+
+    // Character for storing user input
+    char user_char;
+
+    // Index for iterating through LEDs
+    int index;
+
+    // Pointer to each LED bit in portA for easier manipulation
+    unsigned char* led_ptr = (unsigned char*)&portA;
+
+    /* ------------------ INITIALIZATION ------------------ */
+
+    // Initialize GPIO pins for LED control
     initPins();
 
-    portA.b0 = 0;
-    portA.b1 = 0;
-    portA.b2 = 0;
-    portA.b3 = 0;
-    portA.b4 = 0;
-    portA.b5 = 0;
-    portA.b6 = 0;
-    portA.b7 = 0;
-
-    char c;
-
-    while((c = getchar()) != 'q' && c != 'Q')
+    // Set all LEDs to OFF (0) initially
+    for(int i = 0; i < 8; i++)
     {
-        printf("%c\n", c);
-        if(c >= '0' && c <= '7')
-        {
-            switch(c - '0')
-            {
-                case 0:
-                    portA.b0 = 1;
-                    break;
-                case 1:
-                    portA.b1 = 1;
-                    break;
-                case 2:
-                    portA.b2 = 1;
-                    break;
-                case 3:
-                    portA.b3 = 1;
-                    break;
-                case 4:
-                    portA.b4 = 1;
-                    break;
-                case 5:
-                    portA.b5 = 1;
-                    break;
-                case 6:
-                    portA.b6 = 1;
-                    break;
-                case 7:
-                    portA.b7 = 1;
-                    break;
-                default: break;
+        led_ptr[i] = 0;
+    }
 
+    /* ------------------ USER INPUT LOOP ------------------ */
+    
+    // Loop to process user commands until 'q' or 'Q' is entered
+    while((user_char = getchar()) != 'q' && user_char != 'Q')
+    {
+        // Print the character input by the user
+        printf("%c\n", user_char);
+
+        // Check if the input is a number between '0' and '7'
+        if(user_char >= '0' && user_char <= '7')
+        {
+            // Set corresponding LED bit to ON
+            led_ptr[user_char - '0'] = 1;
+        }
+
+        else if(user_char == 't' || user_char == 'T')
+        {
+            // Toggle all LEDs
+            for(index = 0; index < 8; index++)
+            {
+                led_ptr[index] = led_ptr[index] ? 0 : 1;
             }
         }
-        else if(c == 't' || c == 'T')
+
+        else if(user_char == 's' || user_char == 'S')
         {
-            portA.b0 = portA.b0? 0: 1;
-            portA.b1 = portA.b1? 0: 1;
-            portA.b2 = portA.b2? 0: 1;
-            portA.b3 = portA.b3? 0: 1;
-            portA.b4 = portA.b4? 0: 1;
-            portA.b5 = portA.b5? 0: 1;
-            portA.b6 = portA.b6? 0: 1;
-            portA.b7 = portA.b7? 0: 1;
+            // Turn all LEDs ON
+            for(index = 0; index < 8; index++)
+            {
+                led_ptr[index] = 1;
+            }
         }
-        else if(c == 's' || c == 'S')
+
+        else if(user_char == 'c' || user_char == 'C')
         {
-            portA.b0 = 1;
-            portA.b1 = 1;
-            portA.b2 = 1;
-            portA.b3 = 1;
-            portA.b4 = 1;
-            portA.b5 = 1;
-            portA.b6 = 1;
-            portA.b7 = 1;
+            // Turn all LEDs OFF
+            for(index = 0; index < 8; index++)
+            {
+                led_ptr[index] = 0;
+            }
         }
-        else if(c == 'c' c == 'C')
-        {
-            portA.b0 = 0;
-            portA.b1 = 0;
-            portA.b2 = 0;
-            portA.b3 = 0;
-            portA.b4 = 0;
-            portA.b5 = 0;
-            portA.b6 = 0;
-            portA.b7 = 0;
-        }
+        
+        // Update LED states on the hardware
         port_read();
-        while((c = getchar()) != '\n');
+
+        // Clear extra characters in input buffer
+        while((user_char = getchar()) != '\n');
     }  
 
+    // De-initialize GPIO pins after program exit
     endPins();
     
+    // Return 0 to indicate successful program completion
     return 0;
 }

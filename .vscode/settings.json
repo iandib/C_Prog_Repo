@@ -5,6 +5,7 @@
         "time.h": "c",
         "calc_gen.h": "c",
         "allegro_primitives.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "hardware.h": "c"
     }
 }

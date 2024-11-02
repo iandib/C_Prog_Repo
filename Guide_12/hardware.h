@@ -1,50 +1,34 @@
-/***************************************************************************//**
-  @file     +hardware.h+
-  @brief    +Modulo hardware+
-  @author   +Grupo 4+
- ******************************************************************************/
+/* *****************************************************************
+    *                    HEADER CONFIGURATION                     *
+   ***************************************************************** */
 
-#ifndef _HARDWARE_H_
-#define _HARDWARE_H_
+// We make sure the header is only included once
+#ifndef HARDWARE_H
+#define HARDWARE_H
 
-/*******************************************************************************
- * INCLUDE HEADER FILES
- ******************************************************************************/
+/* --------------------- NECESSARY LIBRARIES --------------------- */
 
+// Standard Input/Output library
+#include <stdio.h>
 
-/*******************************************************************************
- * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
- ******************************************************************************/
+// Standard library for string manipulation
+#include <string.h>
 
+/* ---------------------- MACROS & CONSTANTS ---------------------- */
 
-/*******************************************************************************
- * ENUMERATIONS AND STRUCTURES AND TYPEDEFS
- ******************************************************************************/
+// Path to the GPIO control files
+#define GPIO_PATH  "/sys/class/gpio/"
 
+// Maximum string length
+#define MAX_STR_LEN 35
 
-/*******************************************************************************
- * VARIABLE PROTOTYPES WITH GLOBAL SCOPE
- ******************************************************************************/
+/* ------------------ PUBLIC FUNCTIONS PROTOTYPES ------------------ */
 
+// Function initializes all pins
+void initializePins();
 
-/*******************************************************************************
- * FUNCTION PROTOTYPES WITH GLOBAL SCOPE
- ******************************************************************************/
+// Function releases all pins
+void releasePins();
 
-/**
- * @brief TODO: Inicializa todos los pines
- * @return void
-*/
-void initPins();
+#endif // HARDWARE_H
 
-/**
- * @brief TODO: Devuelve todos los pines al sistema operativo
- * @return void
-*/
-void endPins();
-
-
-/*******************************************************************************
- ******************************************************************************/
-
-#endif // _HARDWARE_H_
