@@ -1,19 +1,59 @@
-tetris: main.o gameLogic.o handler.o common.o allegro.o
-	gcc main.o gameLogic.o handler.o common.o allegro.o -o tetris -g -Wall
- 
-main.o: main.c gameLogic.h common.h
-	gcc -c main.c -o main.o -Wall -g
+# *****************************************************************
+#    *                  MAKEFILE CONFIGURATION                   *
+# *****************************************************************
 
-gameLogic.o: gameLogic.c gameLogic.h handler.h common.h 
-	gcc -c gameLogic.c -o gameLogic.o -Wall -g
+# -------------------------- VARIABLES --------------------------
+
+# Compilator
+CC := gcc
+
+# Compilator flags
+CFLAGS := -g -Wall
+
+# Linker flags
+LDFLAGS := -lallegro -lallegro_primitives -lallegro_image -lallegro_font -lallegro_ttf -lallegro_audio -lallegro_acodec
+
+# Executable name
+EXEC := tetris
+
+# Source files
+SRCS := main.c \
+        gameLogic.c \
+        handler.c \
+        allegro.c \
+        common.c
+
+# Object files
+OBJS := main.o \
+        gameLogic.o \
+        handler.o \
+        allegro.o \
+        common.o
+
+# ---------------------- COMPILATION RULES ----------------------
+
+# Rule to generate the executable
+${EXEC}: ${OBJS}
+	${CC} ${OBJS} ${CFLAGS} ${LDFLAGS} -o ${EXEC}
+
+# Rule to generate the object files
+main.o: main.c gameLogic.h common.h
+	${CC} ${CFLAGS} -c main.c -o main.o
+
+gameLogic.o: gameLogic.c gameLogic.h handler.h common.h
+	${CC} ${CFLAGS} -c gameLogic.c -o gameLogic.o
 
 handler.o: handler.c handler.h allegro.h
-	gcc -c handler.c -o handler.o -Wall -g
-	
+	${CC} ${CFLAGS} -c handler.c -o handler.o
+
 allegro.o: allegro.c allegro.h common.h
-	gcc allegro.c -c -Wall -g
+	${CC} ${CFLAGS} -c allegro.c -o allegro.o
 
 common.o: common.c common.h
-	gcc -c common.c -o common.o -Wall -g
+	${CC} ${CFLAGS} -c common.c -o common.o
+
+# ----------------------- CLEANING RULES -----------------------
+
+# Rule to clean the object files
 clean:
-	rm *.o
+	rm -f ${OBJS}
