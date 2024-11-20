@@ -13,6 +13,7 @@
 
 #include <stdbool.h>
 
+
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
@@ -80,14 +81,20 @@ typedef struct {
     int rotateTimer;
 } Tetromino;
 
+typedef struct{
+	char name[4];
+	int score;
+} player_t;
+
 typedef struct {
-    int grid[GRID_HEIGHT][GRID_WIDTH]; // Game grid
-    int tetrominoGrid[GRID_HEIGHT][GRID_WIDTH]; // Specific tetromino block grid
-    Tetromino activeTetromino; // Active tetromino
-    Tetromino nextTetromino; // Next tetromino
-    long score; // Score
+    int grid[GRID_HEIGHT][GRID_WIDTH]; // Game grid		-SAVE
+    int tetrominoGrid[GRID_HEIGHT][GRID_WIDTH]; // Specific tetromino block grid	-SAVE
+    Tetromino activeTetromino; // Active tetromino		-SAVE
+    Tetromino nextTetromino; // Next tetromino			-SAVE
+    long score; // Score								-SAVE
     int highScoreIndex; // Highscore index
-    int level; // Level
+    player_t leaderboard[11];	//Leaves an space at the end to store the current player data
+    int level; // Level									-SAVE
     bool gameOver; // Game over flag
     long frames; // Frame counter
     int lines; // Cleared lines counter
@@ -100,6 +107,7 @@ typedef struct {
     bool menu; // Menu flag
     int statistics[NUM_SHAPES]; // Statistics
 } Game;
+
 
 /*******************************************************************************
  * VARIABLE PROTOTYPES WITH GLOBAL SCOPE
@@ -119,7 +127,6 @@ typedef struct {
 * @param active Whether the shape is to be copied onto the active tetromino or the next tetromino
 */
 void copyShape(const int source[TETROMINO_H][TETROMINO_W], Game* game, bool active);
-
 
 /*******************************************************************************
  ******************************************************************************/

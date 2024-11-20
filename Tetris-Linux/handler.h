@@ -57,7 +57,11 @@ void initializeElements();
 * @brief Destroys necesary elements
 */
 void destroyElements();
-
+/**
+* @brief saves necesary elements
+*/
+void recover_game(Game* game);
+void save_game(Game* game);
 
 // --- hud ---
 /**
@@ -114,7 +118,7 @@ void drawNewHighScore(long score, int scoreIndex);
 /**
 * @brief Draws updated top score if beaten on the previous game
 */
-void drawUpdatedScore();
+void drawUpdatedScore(Game* game);
 
 /**
 * @brief Updates color map of the fixed tetrominos

@@ -48,6 +48,11 @@ static void raspyGameLoop(Game* game);
 static void raspyMenuLoop (Game* game);
 #endif
 
+static int compare(const void* p1, const void* p2);
+static void initialize_leaderboard(Game* game);
+static void update_leaderboard(Game* game);
+
+
 // +ej: static void falta_envido (int);+
 
 
@@ -193,6 +198,7 @@ static void allegroGameLoop(Game* game)
             else if (movedDown(game))
             {
                 game->pause = false;
+
                 break;
             }
             else if (movedLeft(game))
@@ -201,6 +207,12 @@ static void allegroGameLoop(Game* game)
                 game->menu = true;
                 break;
             }
+            /*else if (movedRight())		//Save
+            {
+            	game->leaderboard[10].score = game->score;
+            	save_game(game);
+            	break;
+            }*/
             else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             {
                 game->quit = true;
@@ -232,9 +244,13 @@ static void allegroGameLoop(Game* game)
         if (game->gameOver)
         {
             drawGameOver(game->score);
-            if (game->highScoreIndex)
-            {
-                drawNewHighScore(game->score, game->highScoreIndex);
+
+        	game->leaderboard[10].score = game->score;
+        	if(game->leaderboard[10].score > game->leaderboard[9].score)
+        	{
+        		update_leaderboard(game);
+
+				drawNewHighScore(game->score, game->highScoreIndex);
             }
         }
 
@@ -298,10 +314,10 @@ static void raspyGameLoop(Game* game)
 
 void initializeGame(Game* game)
 {
-    #ifdef PC
-    if (!game->frames)
+	#ifdef PC
+	if (!game->frames)
 	{
-    	game->menu = true;
+		game->menu = true;
 	}
 	else
 	{
@@ -310,40 +326,53 @@ void initializeGame(Game* game)
 	#else
 	game->menu = true;
 	#endif
-	
-    game->gameOver = false;
-    game->frames = 0;
-    game->score = 0;
-    game->highScoreIndex = 0;
-    game->level = 0;
-    game->lines = 0;
-    game->levelCheckpoint = 10 * (game->level + 1);
-    game->fixDelay = 0;
-    game->waitingForExit = false;
-    game->quit = false;
-    game->pause = false;
-    game->redraw = true; 
+	game->grid[10][0] = 1;
+	game->gameOver = false;
+	game->frames = 0;
+	game->score = 0;
+	game->highScoreIndex = 0;
+	game->level = 0;
+	game->lines = 0;
+	game->levelCheckpoint = 1 * (game->level + 1);
+	game->fixDelay = 0;
+	game->waitingForExit = false;
+	game->quit = false;
+	game->pause = false;
+	game->redraw = true;
 
-    drawUpdatedScore();
+	drawUpdatedScore(game);
+	initialize_leaderboard(game);
 
-    int i;
-    for (i = 0; i < NUM_SHAPES; i++)
-    {
-        game->statistics[i] = 0;
-    }
 
-    // Initialize the game grid with zeros
-    for (i = 0; i < GRID_HEIGHT; i++)
-    {
-        for (int j = 0; j < GRID_WIDTH; j++)
-        {
-            game->grid[i][j] = 0;
-            game->tetrominoGrid[i][j] = 0;
-        }
-    }
+	int i;
+	for (i = 0; i < NUM_SHAPES; i++)
+	{
+		game->statistics[i] = 0;
+	}
 
-    // Generate a new random tetromino
-    generateNewTetromino(game);
+	// Initialize the game grid with zeros
+	for (i = 0; i < GRID_HEIGHT; i++)
+	{
+		for (int j = 0; j < GRID_WIDTH; j++)
+		{
+			game->grid[i][j] = 0;
+			game->tetrominoGrid[i][j] = 0;
+		}
+	}/*
+	game->score=2200;
+
+	for (i = 0; i < GRID_HEIGHT; i++)
+	{
+		for (int j = 0; j < GRID_WIDTH; j++)
+		{
+
+			game->grid[i][j] = 0;
+			game->tetrominoGrid[i][j] = 0;
+		}
+	}*/
+	// Generate a new random tetromino
+	generateNewTetromino(game);
+
 }
 
 // Updates game state
@@ -360,7 +389,7 @@ void updateGame(Game* game)
             
             playSoundIndex(GAME_OVER);
             
-            updateLeaderboard(game);
+            update_leaderboard(game);
         }
     }
 
@@ -400,7 +429,7 @@ void updateGame(Game* game)
 void updateMovement(Game* game)
 {
     if (game->activeTetromino.moveTimer)
-        game->activeTetromino.moveTimer--;
+    	game->activeTetromino.moveTimer--;
     else
     {
         #ifdef PC
@@ -408,7 +437,7 @@ void updateMovement(Game* game)
 		#endif
         if (movedLeft())
         {
-            if (canMoveSideways(game, -1)) // Move tetromino right
+            if (canMoveSideways(game, -1)) // Move tetromino left
             {
                 game->activeTetromino.x--;
                 playSoundIndex(MOVE_SIDEWAYS);
@@ -424,9 +453,9 @@ void updateMovement(Game* game)
         }
         else if (movedDown())
         {
-            if (canMoveDown(game))
+            if (canMoveDown(game))  // Move tetromino down
                 game->activeTetromino.y++;
-            ; // Move tetromino down
+
         }
     }
     if (game->activeTetromino.rotateTimer)
@@ -456,8 +485,8 @@ void updateLevel(Game* game)
 void rotateTetromino(Game* game)
 {
     // Create a copy of the current tetromino position and rotation
-    int oldX = game->activeTetromino.x;
-    int oldY = game->activeTetromino.y;
+    //int oldX = game->activeTetromino.x;
+    //int oldY = game->activeTetromino.y;
     int oldRotation = game->activeTetromino.rotation;
     int newRotation = (oldRotation + 1) % 4;
 
@@ -508,7 +537,7 @@ bool canMoveSideways(Game* game, int xOffset)
 
     // Check if the tetromino can move horizontally in the specified direction
     bool canMove = true;
-    int rotation = game->activeTetromino.rotation;
+    //int rotation = game->activeTetromino.rotation;
 
     int i;
     int j;
@@ -543,7 +572,7 @@ bool canMoveSideways(Game* game, int xOffset)
 
 bool canMoveDown(const Game* game)
 {
-    int rotation = game->activeTetromino.rotation;
+    //int rotation = game->activeTetromino.rotation;
     int i;
     int j;
     // Check if any cells below the tetromino are occupied or if it has reached the bottom
@@ -619,7 +648,7 @@ void clearRows(Game* game)
                 for (j = 0; j < GRID_WIDTH; j++)
                 {
                     game->grid[k][j] = game->grid[k - 1][j];
-                    game->tetrominoGrid[k][j] = game->tetrominoGrid[k - 1][j];
+                    //game->tetrominoGrid[k][j] = game->tetrominoGrid[k - 1][j];
                 }
             }
 
@@ -744,7 +773,7 @@ bool isGameOver(const Game* game)
 {
     if (!game->fixDelay)
     {
-        int rotation = game->activeTetromino.rotation;
+        //int rotation = game->activeTetromino.rotation;
 
         int i;
         int j;
@@ -768,13 +797,68 @@ bool isGameOver(const Game* game)
     return false;
 }
 
+
+static void initialize_leaderboard(Game* game)
+{
+	FILE *lead = fopen("leaderboard.txt", "r");
+	if(lead == NULL)
+	{
+		exit(1);
+	}
+	for (int i = 0; i < 10; i++)
+	{									//Puts all highscore into the structures of leaderboard
+		fscanf(lead, "%s", game->leaderboard[i].name);
+		fscanf(lead, "%d", &(game->leaderboard[i].score));
+	}
+	fclose(lead);
+}
+
+static void update_leaderboard(Game* game)
+{		//NEW HIGHSCOREEEEEEE
+		#ifdef PC
+			//allegro_naming(game->leaderboard[10].name);
+		#endif
+		qsort(game->leaderboard, 10, sizeof(player_t), compare);
+		FILE *leader = fopen("leaderboard.txt", "w");
+		if(leader == NULL)
+		{
+			exit(1);
+		}
+		for(int i=0; i<10; i++)
+		{
+			fprintf(leader, "%s %u\n", game->leaderboard[i].name, game->leaderboard[i].score);
+		}
+
+		fclose(leader);
+
+}
+
+static int compare(const void* p1, const void* p2)
+{
+	const player_t* pa = p1;
+	const player_t* pb = p2;
+	if(pa->score > pb->score)
+	{
+		return -1;
+	}
+	if(pa->score < pb->score)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+//static void save_n_quit(Game* game){
+
+
+/*
 void updateLeaderboard(Game* game) 
 {
     // Read current leaderboard from file
     FILE* file = fopen(LEADERBOARD_FILE, "r");
     if (file == NULL) 
     {
-        printf("Error opening leaderboar file for reading\n");
+        printf("Error opening leaderboard file for reading\n");
         exit(EXIT_FAILURE);
     }
 
@@ -785,7 +869,7 @@ void updateLeaderboard(Game* game)
     {
         if (fscanf(file, "%d", &leaderboard[i]) == EOF)
         {
-            printf("Error reading from leaderboar file\n");
+            printf("Error reading from leaderboard file\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -793,7 +877,7 @@ void updateLeaderboard(Game* game)
     fclose(file);
 
     // Insert new score
-    int j;
+    //int j;
 
     for (i = 0; i < LEADERBOARD_SIZE; ++i) 
     {
@@ -827,7 +911,7 @@ void updateLeaderboard(Game* game)
 
     fclose(file);
 }
-
+*/
 /*******************************************************************************
  *******************************************************************************
                         LOCAL FUNCTION DEFINITIONS

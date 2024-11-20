@@ -76,6 +76,7 @@ static void checkInitialization(bool test, const char* description);
 // --- keyboard ---
 static void allegroInitializeKeyboard();
 
+
 // --- display ---
 static void allegroInitializeDisplay();
 static void allegroDestroyDisplay();
@@ -113,6 +114,10 @@ static void allegroDrawStatistics(const Game* game);
  * STATIC VARIABLES AND CONST VARIABLES WITH FILE LEVEL SCOPE
  ******************************************************************************/
 
+/*******************************************************************************
+ * FUNCTION PROTOTYPES WITH GLOBAL SCOPE
+ ******************************************************************************/
+void allegroGetTopScore(Game* game);
 
 /*******************************************************************************
  *******************************************************************************
@@ -122,7 +127,7 @@ static void allegroDrawStatistics(const Game* game);
 
 // --- allegro ---
 
-void initializeAllegro()
+void initializeAllegro(Game* game)
 {
     // Initialize Allegro
     checkInitialization(al_init(), "Allegro");
@@ -155,7 +160,7 @@ void initializeAllegro()
     allegroInitializeEventQueue();
 
     // Gets the top score
-    allegroGetTopScore();
+    allegroGetTopScore(game);
 
 
 }
@@ -234,7 +239,7 @@ void allegroUpdateHud(Game* game)
         }
 
         // Increases score display in steps
-        for (long i = 5; i > 0; i--)
+        for (long i = 5; i >= 0; i--)
         {
             long diff = 1 << i;
             if (allegro->score_display <= (game->score - diff))
@@ -279,7 +284,7 @@ void allegroDrawHud(Game* game)
         192, 32,
         0,
         "%06ld",
-        allegro->topScore
+		allegro->topScore
     );
 
     // Draws next tetromino
@@ -317,6 +322,10 @@ void allegroDrawMenu()
     );
 }
 
+void allegroDrawLeaderboard()
+{
+//
+}
 void allegroDrawGrid(const Game* game)
 {
     int blockCode;
@@ -410,14 +419,14 @@ void allegroDrawHighScore(long score, int scoreIndex)
         "%s",
         scoreString
     );
-    al_draw_textf(
+    /*al_draw_textf(
         allegro->font,
         al_map_rgb_f(1, 1, 1),
         BUFFER_W / 2 + 41, BUFFER_H / 2,
         0,
         "%02d",
         scoreIndex
-    );
+    );*/
 }
 
 void allegroDrawPause()
@@ -492,6 +501,14 @@ void allegroPlaySound(int soundIndex)
 
 // --- top score ---
 
+void allegroGetTopScore(Game* game){
+
+    if (game->leaderboard[0].score <= MAX_SCORE)
+        allegro->topScore = game->leaderboard[0].score;
+    else
+        allegro->topScore = MAX_SCORE;
+}
+/*
 void allegroGetTopScore()
 {
     FILE* file = fopen("leaderboard.txt", "r"); // Open the file for reading
@@ -503,7 +520,7 @@ void allegroGetTopScore()
         exit(1);
     }
 
-    if (fscanf(file, "%ld", &score) == EOF)
+    ¿if (fscanf(file, "%ld", &score) == EOF)
     {
 		printf("Error reading the leaderboard file.\n");
 		exit(1);
@@ -517,7 +534,7 @@ void allegroGetTopScore()
     else
         allegro->topScore = MAX_SCORE;
 }
-
+*/
 /*******************************************************************************
  *******************************************************************************
                         LOCAL FUNCTION DEFINITIONS
@@ -599,7 +616,7 @@ static void allegroInitializeSprites()
         }
     }
 
-    sprites.hud = allegroGrabSprite(HUD_OFFSET_X, 0, BUFFER_W, BUFFER_W);
+    sprites.hud = allegroGrabSprite(HUD_OFFSET_X, 0, BUFFER_W, BUFFER_H);
 
     sprites.menu = allegroGrabSprite(MENU_OFFSET_x, 0, BUFFER_W, BUFFER_H);
 }

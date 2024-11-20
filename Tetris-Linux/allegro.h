@@ -115,7 +115,7 @@ extern int tetrominoShapes[NUM_SHAPES][TETROMINO_R][TETROMINO_H][TETROMINO_W];
  /**
   * @brief Initializes all necesary Allegro elements
   */
-void initializeAllegro();
+void initializeAllegro(Game* game);
 
 /**
  * @brief Destroys all necesary Allegro elements
@@ -216,7 +216,7 @@ void allegroPlaySound(int soundIndex);
 /**
  * @brief Fetches the top score from the leaderboard
  */
-void allegroGetTopScore();
+void allegroGetTopScore(Game* game);
 
 #endif // PC
 

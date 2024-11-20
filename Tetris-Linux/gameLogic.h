@@ -90,7 +90,6 @@ bool isGameOver(const Game* game);
  * @brief Updates leaderboard after a game
  * @param game Pointer to the game structure
  */
-void updateLeaderboard(Game* game);
 
 /**
  * @brief Checks if the active tetromino can move down
@@ -130,6 +129,8 @@ bool canMoveSideways(Game* game, int xOffset);
  * @param game Pointer to the game structure
  */
 void rotateTetromino(Game* game);
+
+
 
 /*******************************************************************************
  ******************************************************************************/
