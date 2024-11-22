@@ -150,8 +150,6 @@ void initializeAllegro(Game* game)
     // Initialize keyboard
     allegroInitializeKeyboard();
 
-    // Seed random number generator
-    srand(time(NULL));
 
     // Initialize timer
     allegroInitializeTimer();
@@ -624,10 +622,9 @@ static void allegroInitializeSprites()
 // Destroys all sprite bitmaps
 static void allegroDestroySprites()
 {
-    int i = 0, j = 0;
-    for (i; i < LEVEL_STYLES; i++)
+    for (int i = 0; i < LEVEL_STYLES; i++)
     {
-        for (j; j < BLOCK_TYPES; j++)
+        for (int j = 0; j < BLOCK_TYPES; j++)
         {
             al_destroy_bitmap(sprites.blocks[i][j]);
         }
