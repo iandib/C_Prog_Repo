@@ -192,6 +192,7 @@ static void allegroGameLoop(Game* game)
             allegroUpdateKeyboard(&event);
             if (movedUp(game))
             {
+            	remove("saving.txt");
                 initializeGame(game);
                 break;
             }
@@ -207,12 +208,14 @@ static void allegroGameLoop(Game* game)
                 game->menu = true;
                 break;
             }
-            /*else if (movedRight())		//Save
+            else if (movedRight())		//Save
             {
+            	game->activeTetromino.moveTimer += KEY_DELAY;
             	game->leaderboard[10].score = game->score;
             	save_game(game);
+            	game->pause = false;
             	break;
-            }*/
+            }
             else if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
             {
                 game->quit = true;
@@ -314,6 +317,8 @@ static void raspyGameLoop(Game* game)
 
 void initializeGame(Game* game)
 {
+    // Seed random number generator
+    srand(time(NULL));
 	#ifdef PC
 	if (!game->frames)
 	{
