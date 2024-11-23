@@ -336,120 +336,50 @@ void save_game(Game* game)
 		}
 	}
 	fprintf(save, "%d ", (game->activeTetromino.x));		//Saves state of active tetromino
-<<<<<<< HEAD
-=======
-	printf("\nactiveTetromino.x %d\t", game->activeTetromino.x);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->activeTetromino.y));
-<<<<<<< HEAD
-=======
-	printf("\nactiveTetromino.y %d\t", game->activeTetromino.y);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->activeTetromino.rotation));
-<<<<<<< HEAD
-=======
-	printf("\nactiveTetromino.rotation %d\t\n", game->activeTetromino.rotation);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	for (int i = 0; i < TETROMINO_H; i++)
 	{
 		for(int j= 0; j < TETROMINO_W ; j++)
 		{
 			fprintf(save, "%d ", (game->activeTetromino.shape[i][j]));
-<<<<<<< HEAD
-=======
-			printf("%d\t", game->activeTetromino.shape[i][j]);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 		}
 	}
 	fprintf(save, "%d ", (game->activeTetromino.shapeIndex));
-<<<<<<< HEAD
-=======
-	printf("\nctiveTetromino.shapeIndex %d\t", game->activeTetromino.shapeIndex);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->activeTetromino.moveTimer));
-<<<<<<< HEAD
-=======
-	printf("\nctiveTetromino.moveTimer %d\t", game->activeTetromino.moveTimer);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->activeTetromino.rotateTimer));
-<<<<<<< HEAD
-=======
-	printf("\nctiveTetromino.rotateTimer %d\t", game->activeTetromino.rotateTimer);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->nextTetromino.x));		//Saves state of next tetromino
-<<<<<<< HEAD
-=======
-	printf("\nnextTetromino.x %d\t", game->nextTetromino.x);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->nextTetromino.y));
-<<<<<<< HEAD
-=======
-	printf("\nnextTetromino.y %d\t", game->nextTetromino.y);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->nextTetromino.rotation));
-<<<<<<< HEAD
-=======
-	printf("\nextTetromino.rotation %d\t\n", game->nextTetromino.rotation);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	for (int i = 0; i < TETROMINO_H; i++)
 	{
 		for(int j= 0; j < TETROMINO_W ; j++)
 		{
 			fprintf(save, "%d ", (game->nextTetromino.shape[i][j]));
-<<<<<<< HEAD
-=======
-			printf("%d\t", game->nextTetromino.shape[i][j]);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 		}
 	}
 	fprintf(save, "%d ", (game->nextTetromino.shapeIndex));
-<<<<<<< HEAD
-=======
-	printf("\nnextTetromino.shapeIndex %d\t", game->nextTetromino.shapeIndex);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->nextTetromino.moveTimer));
-<<<<<<< HEAD
-=======
-	printf("\nnextTetromino.moveTimer %d\t", game->nextTetromino.moveTimer);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->nextTetromino.rotateTimer));
-<<<<<<< HEAD
-=======
-	printf("\nnextTetromino.rotateTimer %d\t", game->nextTetromino.rotateTimer);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%ld ", (game->score));		//Saves other game values
-<<<<<<< HEAD
-=======
-	printf("\n%ld\t", game->score);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 
 	fprintf(save, "%d ", (game->level));
-<<<<<<< HEAD
-=======
-	printf("\n%d\t\n", game->level);
-	printf("\nhola \n");
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 	for (int i = 0; i < NUM_SHAPES; i++)
 	{
 		fprintf(save, "%d ", (game->statistics[i]));
-<<<<<<< HEAD
-=======
-		printf("%d\t", game->statistics[i]);
->>>>>>> branch 'FINAL' of https://github.com/iandib/C_Prog_Repo.git
 	}
-	printf("\n");
 	fclose(save);
 }
 void updateColorMap(Game* game, int row, int col)
