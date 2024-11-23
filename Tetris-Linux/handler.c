@@ -326,86 +326,60 @@ void save_game(Game* game)
 		for(int j= 0; j < GRID_WIDTH; j++)
 		{
 			fprintf(save, "%d ", (game->grid[i][j]));
-			printf("%d\t", game->grid[i][j]);
 		}
-		printf("\n");
 	}
-	printf("\n");printf("\n");
 	for (int i = 0; i < GRID_HEIGHT; i++)
 	{							//Puts all saved tetromino blocks into the saving.txt
 		for(int j= 0; j < GRID_WIDTH; j++)
 		{
 			fprintf(save, "%d ", (game->tetrominoGrid[i][j]));
-			printf("%d\t", game->tetrominoGrid[i][j]);
 		}
-		printf("\n");
 	}
 	fprintf(save, "%d ", (game->activeTetromino.x));		//Saves state of active tetromino
-	printf("\nactiveTetromino.x %d\t", game->activeTetromino.x);
 
 	fprintf(save, "%d ", (game->activeTetromino.y));
-	printf("\nactiveTetromino.y %d\t", game->activeTetromino.y);
 
 	fprintf(save, "%d ", (game->activeTetromino.rotation));
-	printf("\nactiveTetromino.rotation %d\t\n", game->activeTetromino.rotation);
 
 	for (int i = 0; i < TETROMINO_H; i++)
 	{
 		for(int j= 0; j < TETROMINO_W ; j++)
 		{
 			fprintf(save, "%d ", (game->activeTetromino.shape[i][j]));
-			printf("%d\t", game->activeTetromino.shape[i][j]);
 		}
-		printf("\n");
 	}
 	fprintf(save, "%d ", (game->activeTetromino.shapeIndex));
-	printf("\nctiveTetromino.shapeIndex %d\t", game->activeTetromino.shapeIndex);
 
 	fprintf(save, "%d ", (game->activeTetromino.moveTimer));
-	printf("\nctiveTetromino.moveTimer %d\t", game->activeTetromino.moveTimer);
 
 	fprintf(save, "%d ", (game->activeTetromino.rotateTimer));
-	printf("\nctiveTetromino.rotateTimer %d\t", game->activeTetromino.rotateTimer);
 
 	fprintf(save, "%d ", (game->nextTetromino.x));		//Saves state of next tetromino
-	printf("\nnextTetromino.x %d\t", game->nextTetromino.x);
 
 	fprintf(save, "%d ", (game->nextTetromino.y));
-	printf("\nnextTetromino.y %d\t", game->nextTetromino.y);
 
 	fprintf(save, "%d ", (game->nextTetromino.rotation));
-	printf("\nextTetromino.rotation %d\t\n", game->nextTetromino.rotation);
 
 	for (int i = 0; i < TETROMINO_H; i++)
 	{
 		for(int j= 0; j < TETROMINO_W ; j++)
 		{
 			fprintf(save, "%d ", (game->nextTetromino.shape[i][j]));
-			printf("%d\t", game->nextTetromino.shape[i][j]);
 		}
-		printf("\n");
 	}
 	fprintf(save, "%d ", (game->nextTetromino.shapeIndex));
-	printf("\nnextTetromino.shapeIndex %d\t", game->nextTetromino.shapeIndex);
 
 	fprintf(save, "%d ", (game->nextTetromino.moveTimer));
-	printf("\nnextTetromino.moveTimer %d\t", game->nextTetromino.moveTimer);
 
 	fprintf(save, "%d ", (game->nextTetromino.rotateTimer));
-	printf("\nnextTetromino.rotateTimer %d\t", game->nextTetromino.rotateTimer);
 
 	fprintf(save, "%ld ", (game->score));		//Saves other game values
-	printf("\n%ld\t", game->score);
 
 	fprintf(save, "%d ", (game->level));
-	printf("\n%d\t\n", game->level);
-	printf("\nhola \n");
 	for (int i = 0; i < NUM_SHAPES; i++)
 	{
 		fprintf(save, "%d ", (game->statistics[i]));
-		printf("%d\t", game->statistics[i]);
 	}
-	printf("\n");
 	fclose(save);
 }
 void updateColorMap(Game* game, int row, int col)
