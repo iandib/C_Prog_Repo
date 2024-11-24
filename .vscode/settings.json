@@ -6,6 +6,7 @@
         "calc_gen.h": "c",
         "allegro_primitives.h": "c",
         "stdio.h": "c",
-        "hardware.h": "c"
+        "hardware.h": "c",
+        "stdint.h": "c"
     }
 }
