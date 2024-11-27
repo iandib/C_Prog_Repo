@@ -7,6 +7,7 @@
         "allegro_primitives.h": "c",
         "stdio.h": "c",
         "hardware.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "compare": "cpp"
     }
 }
