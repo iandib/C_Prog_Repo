@@ -57,28 +57,29 @@ enum blockTypes
 
 
 static void copyShape(const int source[TETROMINO_H][TETROMINO_W], Game* game, bool active);
-static bool canMoveSideways(Game* game, int xOffset);
-static bool canMoveDown(const Game* game);
-static bool isGameOver(const Game* game);
-static void updateScore(Game* game, int numClearedRows);
-static void clearRows(Game* game);
-static void fixTetromino(Game* game);
-static void updateColorMap(Game* game, int row, int col);
-static void updateLevel(Game* game);
+static void rotate(Game* game);														//Checks if the tetromino can rotate, if it is possible, it is rotated.
+static bool canMoveSideways(Game* game, int xOffset);								//Checks if the current tetromino can move sideways
+static bool canMoveDown(const Game* game);											//Checks if the current tetromino can move down
+static bool isGameOver(const Game* game);											//Checks for game over
+static void updateScore(Game* game, int numClearedRows);							//Updates the current game score
+static void clearRows(Game* game);													//Clears full rows
+static void fixTetromino(Game* game);												//Fixes current tetromino in its current position (fills game grid with its shape)
+static void updateColorMap(Game* game, int row, int col);							//Updates of the fixed tetromino (makes it possible for the grid to have different colors)
+static void updateLevel(Game* game);												//Updates game level
 
-void initializeGame(Game* game);
-void * th1_gamelogic(void* gamep);
-void generateNewTetromino(Game* game);
+void initializeGame(Game* game);													//Initializes the game structure with the proper initial values
+void * th1_gamelogic(void* gamep);													//Thread 1 declaration
+void generateNewTetromino(Game* game);												//Generates a new tetromino on the grid
 
-extern int tetrominoShapes[NUM_SHAPES][TETROMINO_R][TETROMINO_H][TETROMINO_W];
+extern int tetrominoShapes[NUM_SHAPES][TETROMINO_R][TETROMINO_H][TETROMINO_W];		//Array of tetromino shapes
 extern sem_t s;
 
 void * th1_gamelogic(void* gamep)
 {
-	Game* game = gamep;
+	Game* game = gamep;													//First, the game struct and leaderboard [TO BE CHECKED] are initialized.
 	initializeGame(game);
 	initialize_leaderboard(game);
-    FILE* save = fopen("saving.txt", "r");
+    FILE* save = fopen("saving.txt", "r");								//If we happen to find an old game, it is restored and pause screen is automatically activated, and if we do not, we will find the menu as soon as we enter the game.
     if(save != NULL){
     	fclose(save);
 		game->pause = true;
@@ -88,23 +89,21 @@ void * th1_gamelogic(void* gamep)
 	{
     	game->menu = true;
 	}
-	srand(time(NULL));
-	//generateNewTetromino(game);
+	srand(time(NULL));													//rand() seed is properly set for a future run
 	while(!game->quit)
 	{
-		if(!game->menu && !game->pause && !game->gameOver)
+		if(!game->menu && !game->pause && !game->gameOver)				//We essentially have 4 states, menu, pause, game over and game. The program runs what is inside this conditional when it is in game. Whereas, the th1 waits for a signal from the semaphore which would be set soon in th2
 		{
-			if(game->activeTetromino.move_down)
+			if(game->activeTetromino.move_down)							//If the tetromino was moved down, whether it was caused by the fall-timer od by user clicking, the program will check if that is a valid action
 			{
-				if(canMoveDown(game))
+				if(canMoveDown(game))									//If it is, the tetromino is moved down
 				{
 					game->activeTetromino.y++;
-					game->activeTetromino.move_down--;						//Moves tetromino
+					game->activeTetromino.move_down--;
 				}
-				else
+				else													//If not, that is because we have reached a surface and the program gets ready to fix the tetromino
 				{
 					game->activeTetromino.move_down = 0;
-					game->fixDelay += 0;
 					// Fixes the tetromino in its current position on the game grid
 					fixTetromino(game);
 
@@ -116,74 +115,35 @@ void * th1_gamelogic(void* gamep)
 
 				}
 			}
-			else if(game->activeTetromino.move_left)
+			else if(game->activeTetromino.move_left)					//This conditional checks if the tetromino was moved left. If that is a valid action then it is moved, if not, the buffer is cleared.
 			{
 				if (canMoveSideways(game, -1))
-				{								 					// Moves tetromino left
+				{
 					game->activeTetromino.x--;
 					game->activeTetromino.move_left--;
 					playSoundIndex(MOVE_SIDEWAYS);
 				}
 				else
 				{
-					game->activeTetromino.move_left = 0;
+					game->activeTetromino.move_left = 0;				//Clear the buffer for left-movements
 				}
 			}
-			else if(game->activeTetromino.move_right)
+			else if(game->activeTetromino.move_right)					//This conditional checks if the tetromino was moved right. If that is a valid action then it is moved, if not, the buffer is cleared.
 			{
 				if (canMoveSideways(game, 1))
-				{														 // Moves tetromino right
+				{
 					game->activeTetromino.x++;
 					game->activeTetromino.move_right--;
 					playSoundIndex(MOVE_SIDEWAYS);
 				}
 				else
 				{
-					game->activeTetromino.move_right = 0;
+					game->activeTetromino.move_right = 0;				//Clear the buffer for right-movements
 				}
 			}
-			else if(game->activeTetromino.rotate_)
+			else if(game->activeTetromino.rotate_)						//This conditional checks if the tetromimo was rotated
 			{
-				int oldRotation = game->activeTetromino.rotation;
-				int newRotation = (oldRotation + 1) % 4;
-				// Checks if the new rotation is valid
-				bool canRotate = true;
-				int i;
-				int j;
-				for (i = 0; i < TETROMINO_H; i++)
-				{
-					for (j = 0; j < TETROMINO_W; j++)
-					{
-						if (tetrominoShapes[game->activeTetromino.shapeIndex][newRotation][i][j] != 0)
-						{
-							int row = game->activeTetromino.y + i;
-							int col = game->activeTetromino.x + j;
-							if (col < 0 || col >= GRID_WIDTH || row <= -1 || row >= GRID_HEIGHT || (row >= 0 && game->grid[row][col] != 0))
-							{
-								canRotate = false;
-								break;
-							}
-						}
-					}
-					if (!canRotate)
-					{
-						break;
-					}
-				}
-				if (canRotate)
-				{
-					// Updates the rotation of the tetromino
-					game->activeTetromino.rotation = newRotation;
-					for (i = 0; i < TETROMINO_H; i++)
-					{
-						for (j = 0; j < TETROMINO_W; j++)
-						{
-							game->activeTetromino.shape[i][j] = tetrominoShapes[game->activeTetromino.shapeIndex][newRotation][i][j];
-						}
-					}
-					game->activeTetromino.rotate_--;
-					playSoundIndex(ROTATE);
-				}
+				rotate(game);											//Depending on the position of the tetromino, this funtion will check if it is possible to rotate or not the tetromino, if it is, the tetromino will be rotated
 			}
 		    if (game->lines >= game->levelCheckpoint)
 		    {
@@ -218,20 +178,6 @@ void * th1_gamelogic(void* gamep)
 
 void initializeGame(Game* game)
 {
-    // Seed random number generator
-	/*#ifdef PC
-	if (!game->frames)
-	{
-		game->menu = true;
-	}
-	else
-	{
-		game->menu = false;
-	}
-	#else
-	game->menu = true;*/
-	//#endif
-	//game->grid[10][0] = 6;
 	game->gameOver = false;
 	game->frames = 0;
 	game->score = 0;
@@ -567,6 +513,49 @@ static void fixTetromino(Game* game)
     playSoundIndex(FIX);
 }
 
+static void rotate(Game* game)
+{
+	int oldRotation = game->activeTetromino.rotation;
+	int newRotation = (oldRotation + 1) % 4;
+															// Checks if the new rotation is valid
+	bool canRotate = true;
+	int i;
+	int j;
+	for (i = 0; i < TETROMINO_H; i++)
+	{
+		for (j = 0; j < TETROMINO_W; j++)
+		{
+			if (tetrominoShapes[game->activeTetromino.shapeIndex][newRotation][i][j] != 0)
+			{
+				int row = game->activeTetromino.y + i;
+				int col = game->activeTetromino.x + j;
+				if (col < 0 || col >= GRID_WIDTH || row <= -1 || row >= GRID_HEIGHT || (row >= 0 && game->grid[row][col] != 0))
+				{
+					canRotate = false;						//As the tetromino cannot rotate, the program must leave this section. Because of this, both of the for cicles have to be broken.
+					j = TETROMINO_W;
+					i = TETROMINO_H;
+				}
+			}
+		}
+	}
+	if (canRotate)
+	{
+		game->activeTetromino.rotation = newRotation;				//Updates the rotation of the tetromino
+		for (i = 0; i < TETROMINO_H; i++)
+		{
+			for (j = 0; j < TETROMINO_W; j++)
+			{
+				game->activeTetromino.shape[i][j] = tetrominoShapes[game->activeTetromino.shapeIndex][newRotation][i][j];
+			}
+		}
+		game->activeTetromino.rotate_--;
+		playSoundIndex(ROTATE);
+	}
+	else
+	{
+		game->activeTetromino.rotate_ = 0;
+	}
+}
 static void updateColorMap(Game* game, int row, int col)
 {
 	#ifdef PC
@@ -579,11 +568,11 @@ static void updateColorMap(Game* game, int row, int col)
 				break;
 			case L:
 			case Z:
-				game->tetrominoGrid[row][col] = (BLOCK_TYPES * (game->level % LEVEL_STYLES)) + LIGHT;
+				game->tetrominoGrid[row][col] = BLOCK_TYPES * (game->level % LEVEL_STYLES) + LIGHT;
 				break;
 			case J:
 			case S:
-				game->tetrominoGrid[row][col] = (BLOCK_TYPES * (game->level % LEVEL_STYLES)) + DARK;
+				game->tetrominoGrid[row][col] = (BLOCK_TYPES * game->level % LEVEL_STYLES) + DARK;
 				break;
 	    }
 	#endif
