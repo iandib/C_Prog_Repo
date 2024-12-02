@@ -186,12 +186,8 @@ void initializeGame(Game* game)											//Set initial values
 	game->redraw = true;
 
 	//initialize_leaderboard(game);										//[TO BE CHECKED]
-	int i;
-	for (i = 0; i < NUM_SHAPES; i++)									//Clear the shape statistics array
-	{
-		game->statistics[i] = 0;
-	}
-	for (i = 0; i < GRID_HEIGHT; i++)									//Clear the game grid
+
+	for (int i = 0; i < GRID_HEIGHT; i++)								//Clear the game grid
 	{
 		for (int j = 0; j < GRID_WIDTH; j++)
 		{
@@ -199,16 +195,8 @@ void initializeGame(Game* game)											//Set initial values
 			game->tetrominoGrid[i][j] = 0;
 		}
 	}
-/*
-    for (i = 0; i < TETROMINO_H; i++)									//
-    {
-        for (int j = 0; j < TETROMINO_W; j++)
-        {
-            game->activeTetromino.shape[i][j] = 0;
-
-        }
-    }*/
 }
+
 static bool canMoveSideways(Game* game, int xOffset)
 {
     // Calculate the new x coordinate for the tetromino
@@ -320,8 +308,8 @@ static bool isGameOver(const Game* game)
     return false;
 }
 
-// Updates game score based on the number of rows cleared and the current level
-static void updateScore(Game* game, int numClearedRows)
+
+static void updateScore(Game* game, int numClearedRows)			// Updates game score based on the number of rows cleared and the current level
 {
     switch (numClearedRows)
     {
@@ -346,9 +334,7 @@ static void updateScore(Game* game, int numClearedRows)
     }
 }
 
-// Updates game level
-
-static void updateLevel(Game* game)
+static void updateLevel(Game* game)								// Updates game level
 {
     if (game->lines >= game->levelCheckpoint)
     {
@@ -356,10 +342,11 @@ static void updateLevel(Game* game)
         game->levelCheckpoint += 10;
     }
 }
+
 void generateNewTetromino(Game* game)							// Generate a new random tetromino
 {
     int shapeIndex = rand() % NUM_SHAPES;						// Randomly select a shape index for the new tetromino
-    if (game->frames)											//If the game have already started
+    if (game->frames)											// If the game have already started
     {
         if (game->nextTetromino.shapeIndex == I)		        // Update the active tetromino with the new shape and position
         {
@@ -405,6 +392,11 @@ void generateNewTetromino(Game* game)							// Generate a new random tetromino
             game->activeTetromino.x = GRID_WIDTH / 2 - 1;
             game->activeTetromino.y = 0;
         }
+
+    	for (int i = 0; i < NUM_SHAPES; i++)									//Clear the shape statistics array
+    	{
+    		game->statistics[i] = 0;
+    	}
         copyShape(tetrominoShapes[shapeIndex][0], game, true);					//Copies another tetromino shape randomly chosen to the active tetromino shape matrix
         game->activeTetromino.shapeIndex = shapeIndex;							// Update the new next tetromino with the new shape and position
         game->statistics[shapeIndex]++;
@@ -419,16 +411,11 @@ void generateNewTetromino(Game* game)							// Generate a new random tetromino
     game->nextTetromino.rotate_ = 0;
 }
 
-// Checks if the active tetromino can move down
-static bool canMoveDown(const Game* game)
+static bool canMoveDown(const Game* game)						// Checks if the active tetromino can move down
 {
-    int i;
-    int j;
-    // Checks if any cells below the tetromino are occupied or if it has reached the bottom
-
-    for (i = 0; i < TETROMINO_H; i++)
+    for (int i = 0; i < TETROMINO_H; i++)						// Checks if any cells below the tetromino are occupied or if it has reached the bottom of the grid
     {
-        for (j = 0; j < TETROMINO_W; j++)
+        for (int j = 0; j < TETROMINO_W; j++)
         {
             if (game->activeTetromino.shape[i][j] != 0)
             {
@@ -557,5 +544,7 @@ static void updateColorMap(Game* game, int row, int col)
 	    }
 	#endif
 }
+
+
 
 
