@@ -4,7 +4,7 @@
  *  Created on: Nov 25, 2024
  *      Author: juani
  */
-#include <stdbool.h>		/////
+#include <stdbool.h>	
 #include <stdio.h>
 #include "common.h"
 #include "th2_display_sound.h"
