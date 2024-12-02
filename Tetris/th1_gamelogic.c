@@ -285,28 +285,25 @@ static void clearRows(Game* game)
 // Checks if the game is over
 static bool isGameOver(const Game* game)
 {
-    if (!game->fixDelay)
-    {
-        int i;
-        int j;
-        // Checks if any cells in the starting position are occupied
+	int i, j, row, col;
 
-        for (i = 0; i < TETROMINO_H; i++)
-        {
-            for (j = 0; j < TETROMINO_W; j++)
-            {
-                if (game->activeTetromino.shape[i][j] != 0)
-                {
-                    int row = game->activeTetromino.y + i;
-                    int col = game->activeTetromino.x + j;
-                    if (game->grid[row][col] != 0)
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
+	// Checks if any cells in the starting position are occupied
+
+	for (i = 0; i < TETROMINO_H; i++)
+	{
+		for (j = 0; j < TETROMINO_W; j++)
+		{
+			if (game->activeTetromino.shape[i][j] != 0)
+			{
+				row = game->activeTetromino.y + i;
+				col = game->activeTetromino.x + j;
+				if (game->grid[row][col] != 0)
+				{
+					return true;
+				}
+			}
+		}
+	}
     return false;
 }
 
