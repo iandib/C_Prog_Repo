@@ -96,11 +96,11 @@ typedef struct {
     long frames; // Frame counter
     int lines; // Cleared lines counter
     int levelCheckpoint; // Level checkpoint
-    int fixDelay; // Bottom row movement buffer
+    int fixDelay; // Bottom row movement buffer	//SACO
     bool quit; // Quit flag
     bool pause; // Pause flag
     bool redraw; // Redraw flag
-    bool waitingForExit; // Waiting for exit flag
+    bool waitingForExit; // Waiting for exit flag	//SACO
     bool menu; // Menu flag
     int statistics[NUM_SHAPES]; // Statistics
 }Game;
