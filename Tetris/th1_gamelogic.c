@@ -145,38 +145,32 @@ void * th1_gamelogic(void* gamep)
 			{
 				rotate(game);											//Depending on the position of the tetromino, this funtion will check if it is possible to rotate or not the tetromino, if it is, the tetromino will be rotated
 			}
-		    if (game->lines >= game->levelCheckpoint)
+		    if (game->lines >= game->levelCheckpoint)					//Depending on the cleared rows so far, the game level is incremented as well as the amount of cleared rows necessary for the next level
 		    {
 		        game->level++;
 		        game->levelCheckpoint += 10;
 		    }
-		    if (isGameOver(game))
+		    if (isGameOver(game))										//If game over is reached, the flag that incates so is activated
 		    {
 		        game->gameOver = true;
-		        if (!game->waitingForExit)
-		        {
-		            game->waitingForExit = true;
-		            playSoundIndex(GAME_OVER);
-		            //update_leaderboard(game);
-		        }
+	            playSoundIndex(GAME_OVER);
 		    }
-			game->redraw = true;
-			game->frames++;
+			game->redraw = true;										//Now we are ready to redraw our grid and HUD
+			game->frames++;												//[TO BE CHECKED]
 		}
-		else
+		else															//As soon as we run the program, this conditional is reached. Generating a new tetromino will be necessary, unless we have an old game loaded. If we do, we previously said that the program would go directly to the pause screen
 		{
-			//initializeGame(game);
 			if(game->menu || game->gameOver)
 			{
 				generateNewTetromino(game);
 			}
-			sem_wait(&s);
+			sem_wait(&s);												//The program waits here for the user to start the game
 		}
 	}
-	pthread_exit(0);
+	pthread_exit(0);													//Finally, if the quit flag is activated, this process is killed
 }
 
-void initializeGame(Game* game)
+void initializeGame(Game* game)											//Set initial values
 {
 	game->gameOver = false;
 	game->frames = 0;
@@ -191,15 +185,13 @@ void initializeGame(Game* game)
 	game->pause = false;
 	game->redraw = true;
 
-	//initialize_leaderboard(game);
+	//initialize_leaderboard(game);										//[TO BE CHECKED]
 	int i;
-	for (i = 0; i < NUM_SHAPES; i++)
+	for (i = 0; i < NUM_SHAPES; i++)									//Clear the shape statistics array
 	{
 		game->statistics[i] = 0;
 	}
-
-	// Initialize the game grid with zeros
-	for (i = 0; i < GRID_HEIGHT; i++)
+	for (i = 0; i < GRID_HEIGHT; i++)									//Clear the game grid
 	{
 		for (int j = 0; j < GRID_WIDTH; j++)
 		{
@@ -207,14 +199,15 @@ void initializeGame(Game* game)
 			game->tetrominoGrid[i][j] = 0;
 		}
 	}
-    for (i = 0; i < TETROMINO_H; i++)
+/*
+    for (i = 0; i < TETROMINO_H; i++)									//
     {
         for (int j = 0; j < TETROMINO_W; j++)
         {
             game->activeTetromino.shape[i][j] = 0;
 
         }
-    }
+    }*/
 }
 static bool canMoveSideways(Game* game, int xOffset)
 {
@@ -363,16 +356,12 @@ static void updateLevel(Game* game)
         game->levelCheckpoint += 10;
     }
 }
-// Generate a new random tetromino
-void generateNewTetromino(Game* game)
+void generateNewTetromino(Game* game)							// Generate a new random tetromino
 {
-    // Randomly select a shape index for the new tetromino
-    int shapeIndex = rand() % NUM_SHAPES;
-    if (game->frames)
+    int shapeIndex = rand() % NUM_SHAPES;						// Randomly select a shape index for the new tetromino
+    if (game->frames)											//If the game have already started
     {
-        // Update the active tetromino with the new shape and position
-
-        if (game->nextTetromino.shapeIndex == I)
+        if (game->nextTetromino.shapeIndex == I)		        // Update the active tetromino with the new shape and position
         {
             game->activeTetromino.x = game->nextTetromino.x - 1;
             game->activeTetromino.y = game->nextTetromino.y - 1;
@@ -382,35 +371,30 @@ void generateNewTetromino(Game* game)
             game->activeTetromino.x = game->nextTetromino.x;
             game->activeTetromino.y = game->nextTetromino.y;
         }
-        copyShape(game->nextTetromino.shape, game, true);
+        copyShape(game->nextTetromino.shape, game, true);						//Copies the next tetromino's values to the active
         game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
-        game->activeTetromino.rotation = game->nextTetromino.rotation;
-        game->activeTetromino.move_down = game->nextTetromino.move_down;
-        game->activeTetromino.move_up = game->nextTetromino.move_up;
-        game->activeTetromino.move_left = game->nextTetromino.move_left;
-        game->activeTetromino.move_right = game->nextTetromino.move_right;
-        game->activeTetromino.rotate_ = game->nextTetromino.rotate_;
-
+		game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
+		game->activeTetromino.rotation = game->nextTetromino.rotation;
+		game->activeTetromino.move_down = game->nextTetromino.move_down;
+		game->activeTetromino.move_up = game->nextTetromino.move_up;
+		game->activeTetromino.move_left = game->nextTetromino.move_left;
+		game->activeTetromino.move_right = game->nextTetromino.move_right;
+		game->activeTetromino.rotate_ = game->nextTetromino.rotate_;
         game->statistics[game->nextTetromino.shapeIndex]++;
 
-        // Update the active tetromino with the new shape and position
         game->nextTetromino.x = GRID_WIDTH / 2 - 1;
         game->nextTetromino.y = 0;
-        copyShape(tetrominoShapes[shapeIndex][0], game, false);
+        copyShape(tetrominoShapes[shapeIndex][0], game, false);					//Copies the next tetromino shape that was chosen with rand() to the next tetromino shape matrix in the game structure
         game->nextTetromino.shapeIndex = shapeIndex;
     }
-    else
+    else																		//If we still need to create the first active tetromino
     {
-        // Update the active tetromino with the new shape and position
-        game->nextTetromino.x = GRID_WIDTH / 2 - 1;
+        game->nextTetromino.x = GRID_WIDTH / 2 - 1;						        // Update the next tetromino with the new shape and position
         game->nextTetromino.y = 0;
-        copyShape(tetrominoShapes[shapeIndex][0], game, false);
+        copyShape(tetrominoShapes[shapeIndex][0], game, false);					//Copies the next tetromino shape that was chosen with rand() to the next tetromino shape matrix in the game structure
         game->nextTetromino.shapeIndex = shapeIndex;
 
-        // Randomly select a shape index for the new tetromino
         shapeIndex = rand() % NUM_SHAPES;
-
-        // Update the active tetromino with the new shape and position
         if (shapeIndex == I)
         {
             game->activeTetromino.x = GRID_WIDTH / 2 - 2;
@@ -421,17 +405,13 @@ void generateNewTetromino(Game* game)
             game->activeTetromino.x = GRID_WIDTH / 2 - 1;
             game->activeTetromino.y = 0;
         }
-        copyShape(tetrominoShapes[shapeIndex][0], game, true);
-        game->activeTetromino.shapeIndex = shapeIndex;
-        game->activeTetromino.rotation = 0;
-        game->activeTetromino.move_down = 0;
-        game->activeTetromino.move_up = 0;
-        game->activeTetromino.move_left = 0;
-        game->activeTetromino.move_right = 0;
-        game->activeTetromino.rotate_ = 0;
+        copyShape(tetrominoShapes[shapeIndex][0], game, true);					//Copies another tetromino shape randomly chosen to the active tetromino shape matrix
+        game->activeTetromino.shapeIndex = shapeIndex;							// Update the new next tetromino with the new shape and position
         game->statistics[shapeIndex]++;
+
+
     }
-    game->nextTetromino.rotation = 0;
+    game->nextTetromino.rotation = 0;											//Basic initial values are set for the next tetromino
     game->nextTetromino.move_down = 0;
     game->nextTetromino.move_up = 0;
     game->nextTetromino.move_left = 0;
@@ -510,7 +490,7 @@ static void fixTetromino(Game* game)
             }
         }
     }
-    playSoundIndex(FIX);
+	playSoundIndex(FIX);
 }
 
 static void rotate(Game* game)
