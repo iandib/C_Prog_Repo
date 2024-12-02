@@ -178,7 +178,7 @@ void initializeGame(Game* game)											//Set initial values
 	game->highScoreIndex = 0;
 	game->level = 0;
 	game->lines = 0;
-	game->levelCheckpoint = 1 * (game->level + 1);
+	game->levelCheckpoint = 1;
 	game->fixDelay = 0;
 	game->waitingForExit = false;
 	game->quit = false;
@@ -208,14 +208,16 @@ static bool canMoveSideways(Game* game, int xOffset)
 
     int i;
     int j;
+    int col;
+    int row;
     for (i = TETROMINO_H - 1; i >= 0; i--)
     {
         for (j = 0; j < TETROMINO_W; j++)
         {
             if (game->activeTetromino.shape[i][j] != 0)
             {
-                int row = game->activeTetromino.y + i;
-                int col = newX + j;
+                row = game->activeTetromino.y + i;
+                col = newX + j;
 
                 // Check if the new position is out of bounds or collides with existing blocks
                 if (col < 0 || col >= GRID_WIDTH || row >= GRID_HEIGHT || (row >= 0 && game->grid[row][col] != 0))
