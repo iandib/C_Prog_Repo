@@ -88,7 +88,6 @@ enum
    ALLEGROKEY_T		= 20,
 
 
-
    ALLEGROKEY_0		= 27,
    ALLEGROKEY_1		= 28,
    ALLEGROKEY_2		= 29,
