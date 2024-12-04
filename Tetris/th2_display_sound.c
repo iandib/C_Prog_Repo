@@ -11,6 +11,8 @@
 #include "th2_display_sound.h"
 #include "th1_gamelogic.h"
 #include <time.h>
+
+#ifdef PC
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
@@ -18,7 +20,9 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_image.h>
-
+#else
+///////////		RASPY LIBRARY
+#endif
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -78,26 +82,8 @@ enum blockTypes
     DARK,
     STRIPES
 };
-enum
-{												//Vuelvo a definir los valores los keycodes del teclado para Allegro (deberían estar en la librería estandar pero no son reconocidos)
-   ALLEGROKEY_B		= 2,
-   ALLEGROKEY_C		= 3,
-   ALLEGROKEY_Q		= 17,
 
-   ALLEGROKEY_S		= 19,
-   ALLEGROKEY_T		= 20,
-
-
-   ALLEGROKEY_0		= 27,
-   ALLEGROKEY_1		= 28,
-   ALLEGROKEY_2		= 29,
-   ALLEGROKEY_3		= 30,
-   ALLEGROKEY_4		= 31,
-   ALLEGROKEY_5		= 32,
-   ALLEGROKEY_6		= 33,
-   ALLEGROKEY_7		= 34,
-};
-
+#ifdef PC
 typedef struct
 {
     ALLEGRO_BITMAP* _sheet;
@@ -161,8 +147,6 @@ static void allegroDisplayPostDraw(ALLEGRO_DISPLAY* display, ALLEGRO_BITMAP* buf
 static void allegroDrawLevel(const Game* game);
 static void allegroDrawStatistics(const Game* game, SPRITES* sprites);
 
-
-
 static void initializeAllegro(Game* game, SPRITES* sprites);
 static void allegroGetTopScore(Game* game);
 static void allegroInitializeDisplay(void);
@@ -178,6 +162,11 @@ static void allegroDestroySound(void);
 static void allegroDestroyDisplay(void);
 static void allegroDestroySprites(SPRITES* sprites);
 
+static ALLEGRO_ELEMENTS allegroElements = { 0 };
+static ALLEGRO_ELEMENTS* allegro = &allegroElements;
+
+#else
+#endif
 
 static void checkInitialization(bool test, const char* description);
 
@@ -192,10 +181,6 @@ void playSoundIndex(int soundIndex);
 
 extern int tetrominoShapes[NUM_SHAPES][TETROMINO_R][TETROMINO_H][TETROMINO_W];
 extern sem_t s;
-
-static ALLEGRO_ELEMENTS allegroElements = { 0 };
-static ALLEGRO_ELEMENTS* allegro = &allegroElements;
-
 
 
 void * th2_display_sound(void* gamep)
@@ -556,12 +541,16 @@ static void save_game(Game* game)
 
 #ifdef PC
 
- static void allegroGetTopScore(Game* game){
-
+static void allegroGetTopScore(Game* game)
+{
     if (game->leaderboard[0].score <= MAX_SCORE)
+    {
         allegro->topScore = game->leaderboard[0].score;
+    }
     else
+    {
         allegro->topScore = MAX_SCORE;
+    }
 }
 static void allegroDisplayPreDraw(ALLEGRO_BITMAP* buffer)
 {
@@ -572,7 +561,6 @@ static void allegroDisplayPostDraw(ALLEGRO_DISPLAY* display, ALLEGRO_BITMAP* buf
 {
     al_set_target_backbuffer(display);
     al_draw_scaled_bitmap(buffer, 0, 0, BUFFER_W, BUFFER_H, 0, 0, DISPLAY_W, DISPLAY_H, 0);
-
     al_flip_display();
 }
 static void allegroUpdateHud(Game* game)
@@ -584,7 +572,6 @@ static void allegroUpdateHud(Game* game)
         {
             allegro->score_display = 0;
         }
-
         // Increases score display in steps
         for (long i = 5; i >= 0; i--)
         {
@@ -592,7 +579,6 @@ static void allegroUpdateHud(Game* game)
             if (allegro->score_display <= (game->score - diff))
                 allegro->score_display += diff;
         }
-
         // If the score is greater than the maximum displayable score, it shows the maximum
         if (allegro->score_display > MAX_SCORE)
             allegro->score_display = MAX_SCORE;
@@ -681,29 +667,27 @@ static void allegroDrawGrid(const Game* game, SPRITES* sprites)
         }
     }
 }
-static void allegroDrawActiveTetromino(const Game* game, SPRITES* sprites)
+static void allegroDrawActiveTetromino(const Game* game, SPRITES* sprites)						// Draws active tetromino
 {
     int blockCode = 0;
-    // Draw active tetromino
     switch (game->activeTetromino.shapeIndex)
     {
-    case I:
-    case O:
-    case T:
-        blockCode = WHITE;
-        break;
-    case L:
-    case Z:
-        blockCode = LIGHT;
-        break;
-    case J:
-    case S:
-        blockCode = DARK;
-        break;
-    default:
-        break;
+		case I:
+		case O:
+		case T:
+			blockCode = WHITE;
+			break;
+		case L:
+		case Z:
+			blockCode = LIGHT;
+			break;
+		case J:
+		case S:
+			blockCode = DARK;
+			break;
+		default:
+			break;
     }
-
     int i;
     int j;
     for (i = 0; i < TETROMINO_H; i++)
@@ -718,8 +702,7 @@ static void allegroDrawActiveTetromino(const Game* game, SPRITES* sprites)
     }
 }
 
-// Draws game level
-static void allegroDrawLevel(const Game* game)
+static void allegroDrawLevel(const Game* game)											// Draws game level on the game screen
 {
     al_draw_textf(
         allegro->font,
@@ -731,52 +714,51 @@ static void allegroDrawLevel(const Game* game)
     );
 }
 
-// Draws the next tetromino to be played
-static void allegroDrawNextTetromino(const Game* game, SPRITES* sprites)
+static void allegroDrawNextTetromino(const Game* game, SPRITES* sprites)					// Draws the next tetromino to be played
 {
     int blockCode = 0;
     int offsetX = 0;
     int offsetY = 0;
 
-    switch (game->nextTetromino.shapeIndex)
+    switch (game->nextTetromino.shapeIndex)														//Positions the next tetromino shape on the corrent spot of the game screen and gives it color
     {
-    case I:
-        blockCode = WHITE;
-        offsetX = 0;
-        offsetY = BLOCK_H / 2;
-        break;
-    case O:
-        blockCode = WHITE;
-        offsetX = BLOCK_W;
-        offsetY = BLOCK_H;
-        break;
-    case T:
-        blockCode = WHITE;
-        offsetX = BLOCK_W / 2;
-        offsetY = BLOCK_H;
-        break;
-    case L:
-    case Z:
-        blockCode = LIGHT;
-        offsetX = BLOCK_W / 2;
-        offsetY = BLOCK_H;
-        break;
+		case I:
+			blockCode = WHITE;
+			offsetX = 0;
+			offsetY = BLOCK_H / 2;
+			break;
+		case O:
+			blockCode = WHITE;
+			offsetX = BLOCK_W;
+			offsetY = BLOCK_H;
+			break;
+		case T:
+			blockCode = WHITE;
+			offsetX = BLOCK_W / 2;
+			offsetY = BLOCK_H;
+			break;
+		case L:
+		case Z:
+			blockCode = LIGHT;
+			offsetX = BLOCK_W / 2;
+			offsetY = BLOCK_H;
+			break;
 
-    case J:
-    case S:
-        blockCode = DARK;
-        offsetX = BLOCK_W / 2;
-        offsetY = BLOCK_H;
-        break;
-    default:
-        break;
+		case J:
+		case S:
+			blockCode = DARK;
+			offsetX = BLOCK_W / 2;
+			offsetY = BLOCK_H;
+			break;
+		default:
+			break;
     }
 
     int i;
     int j;
     for (i = 0; i < TETROMINO_H; i++)
     {
-        for (j = 0; j < TETROMINO_W; j++)
+        for (j = 0; j < TETROMINO_W; j++)										//Draws the next tetromino shape on the right
         {
             if (game->nextTetromino.shape[i][j] != 0)
             {
@@ -789,7 +771,7 @@ static void allegroDrawNextTetromino(const Game* game, SPRITES* sprites)
         }
     }
 }
-static void allegroDrawGameOver(long score)
+static void allegroDrawGameOver(long score)								//Draws the game over screen with its options and points that were gathered during the game
 {
     al_draw_filled_rectangle(0, 0, BUFFER_W, BUFFER_H, al_map_rgba_f(0, 0, 0, 0.8));
     al_draw_text(
@@ -822,7 +804,7 @@ static void allegroDrawGameOver(long score)
         score
     );
 }
-static void allegroDrawPause(void)
+static void allegroDrawPause(void)								//Draws the pause screen with its options
 {
     al_draw_filled_rectangle(0, 0, BUFFER_W, BUFFER_H, al_map_rgba_f(0, 0, 0, 0.9));
     al_draw_text(
@@ -871,19 +853,18 @@ static void allegroDrawPause(void)
     );
 }
 
-// Draws lines and tetromino statistics
-static void allegroDrawStatistics(const Game* game, SPRITES* sprites)
+static void allegroDrawStatistics(const Game* game, SPRITES* sprites)						// Draws lines and tetromino statistics
 {
     int index;
     int statisticOffsetX = 55;
     int statisticOffsetY = 80;
 
-    for (index = 0; index < NUM_SHAPES; index++)
+    for (index = 0; index < NUM_SHAPES; index++)							//For the statistics of every tetromino shape
     {
         int blockCode = 0;
         int offsetX = 18;
         int offsetY = 76;
-        switch (index)
+        switch (index)														//Corrects the position of the statistics depending on the shape
         {
         case I:
             blockCode = WHITE;
@@ -917,22 +898,21 @@ static void allegroDrawStatistics(const Game* game, SPRITES* sprites)
 
         int i;
         int j;
-        for (i = 0; i < TETROMINO_H; i++)
+        for (i = 0; i < TETROMINO_H; i++)									//Draws the corresponding tetromino shape
         {
             for (j = 0; j < TETROMINO_W; j++)
             {
                 if (tetrominoShapes[index][0][i][j] != 0)
                 {
                     al_draw_bitmap(
-                    		sprites->blocks[game->level % LEVEL_STYLES][blockCode], // @suppress("Field cannot be resolved")
+                    		sprites->blocks[game->level % LEVEL_STYLES][blockCode],
                         j * BLOCK_W + offsetX, i * BLOCK_H + offsetY,
                         0);
                 }
             }
         }
 
-        // Draws completed lines
-        al_draw_textf(
+        al_draw_textf(									       			 // Draws the number of tetrominos that were generated in the current game, sorting them by shape
             allegro->font,
             al_map_rgb_f(1, 1, 1),
             statisticOffsetX, statisticOffsetY + 18 * index,
@@ -943,7 +923,7 @@ static void allegroDrawStatistics(const Game* game, SPRITES* sprites)
     }
 }
 
-static void allegroDrawHighScore(long score, int scoreIndex)
+static void allegroDrawHighScore(long score, int scoreIndex)				//Draws highscore screen [TO BE CHECKED]
 {
     const char* scoreString = "NEW HIGHSCORE #  !!!";
     al_draw_textf(
@@ -958,42 +938,39 @@ static void allegroDrawHighScore(long score, int scoreIndex)
 //DRAW LEADERBOARD
 
 
-static void initializeAllegro(Game* game, SPRITES* sprites)
+static void initializeAllegro(Game* game, SPRITES* sprites)								// Initialize Allegro
 {
-    // Initialize Allegro
     checkInitialization(al_init(), "Allegro");
 
     // Initialize display
     allegroInitializeDisplay();
 
-    // Initialize sprites
+    // Initializes sprites
     allegroInitializeSprites(sprites);
 
-    // Initialize primitives addon
+    // Initializes primitives addon
     checkInitialization(al_init_primitives_addon(), "primitives");
 
-    // Initialize fonts
+    // Initializes fonts
     allegroInitializeFonts();
 
-    // Initialize sound
+    // Initializes sound
     allegroInitializeSound();
 
-    // Initialize keyboard
+    // Initializes keyboard
     checkInitialization(al_install_keyboard(), "keyboard");
 
-    // Initialize timer
+    // Initializes timer
     allegroInitializeTimer();
 
-    // Create event queue
+    // Creates event queue
     allegroInitializeEventQueue();
 
     // Gets the top score
     allegroGetTopScore(game);
-
-
 }
 
-static void allegroInitializeDisplay(void)
+static void allegroInitializeDisplay(void)								//Creates the display, a buffer and sets window title
 {
     al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 1, ALLEGRO_SUGGEST);
     al_set_new_display_option(ALLEGRO_SAMPLES, 8, ALLEGRO_SUGGEST);
@@ -1004,18 +981,14 @@ static void allegroInitializeDisplay(void)
     allegro->buffer = al_create_bitmap(BUFFER_W, BUFFER_H);
     checkInitialization(allegro->buffer, "bitmap buffer");
 
-    // Set window title
     al_set_window_title(allegro->display, "Tetris");
 }
 
-// Initializes image addon and grabs all sprites
-static void allegroInitializeSprites(SPRITES* sprites)
+static void allegroInitializeSprites(SPRITES* sprites)								// Initializes image addon and grabs all of the sprites
 {
     checkInitialization(al_init_image_addon(), "image");
-
     sprites->_sheet = al_load_bitmap("spritesheet.png");
     checkInitialization(sprites->_sheet, "spritesheet");
-
     int i, j;
     for (i = 0; i < LEVEL_STYLES; i++)
     {
@@ -1030,24 +1003,21 @@ static void allegroInitializeSprites(SPRITES* sprites)
     sprites->menu = allegroGrabSprite(MENU_OFFSET_x, 0, BUFFER_W, BUFFER_H, sprites);
 }
 
-// Initializes font addon and creates font
-static void allegroInitializeFonts(void)
+static void allegroInitializeFonts(void)											// Initializes font addon and creates builtin font as well as sets the displayed score in 0
 {
     checkInitialization(al_init_font_addon(), "font addon");
     allegro->font = al_create_builtin_font();
     checkInitialization(allegro->font, "font");
-
     allegro->score_display = 0;
 }
 
-// Initializes audio addon and reserves samples
-static void allegroInitializeSound(void)
+static void allegroInitializeSound(void)											// Initializes audio addon and reserves samples
 {
-    checkInitialization(al_install_audio(), "audio");
+    checkInitialization(al_install_audio(), "audio");								//Initializes audio, acodec addon and reserves samples.
     checkInitialization(al_init_acodec_addon(), "audio codecs");
     checkInitialization(al_reserve_samples(16), "reserve samples");
 
-    ALLEGRO_SAMPLE* burnSFX = al_load_sample("burn.wav");
+    ALLEGRO_SAMPLE* burnSFX = al_load_sample("burn.wav");							//Initializes all the samples, one by one.
     checkInitialization(burnSFX, "burn");
     ALLEGRO_SAMPLE* tetrisSFX = al_load_sample("tetris.wav");
     checkInitialization(tetrisSFX, "tetris");
@@ -1062,7 +1032,7 @@ static void allegroInitializeSound(void)
     ALLEGRO_SAMPLE* victorySFX = al_load_sample("victory.wav");
     checkInitialization(victorySFX, "victory");
 
-    allegro->SFX[BURN] = burnSFX;
+    allegro->SFX[BURN] = burnSFX;													//Loads the samples in the proper field of the allegro struct
     allegro->SFX[TETRIS] = tetrisSFX;
     allegro->SFX[MOVE_SIDEWAYS] = moveSidewaysSFX;
     allegro->SFX[ROTATE] = rotateSFX;
@@ -1070,89 +1040,82 @@ static void allegroInitializeSound(void)
     allegro->SFX[GAME_OVER] = gameOverSFX;
     allegro->SFX[VICTORY] = victorySFX;
 
-    allegro->music = al_load_audio_stream("music1.wav", 2, 2048);
+    allegro->music = al_load_audio_stream("music1.wav", 2, 2048);					//Loads the backround music in the audio stream, plays it in loop, and attaches it to the default mixer
     checkInitialization(allegro->music, "music");
     al_set_audio_stream_playmode(allegro->music, ALLEGRO_PLAYMODE_LOOP);
     al_set_audio_stream_gain(allegro->music, 0.3);
     al_attach_audio_stream_to_mixer(allegro->music, al_get_default_mixer());
 }
 
-// Initializes event queue and registers event sources
-static void allegroInitializeEventQueue(void)
+static void allegroInitializeEventQueue(void)														// Initializes event queue and registers event sources
 {
     allegro->eventQueue = al_create_event_queue();
     checkInitialization(allegro->eventQueue, "event queue");
 
-    // Register display and timer event sources in the event queue
-    al_register_event_source(allegro->eventQueue, al_get_display_event_source(allegro->display));
+    al_register_event_source(allegro->eventQueue, al_get_display_event_source(allegro->display));			    // Registers display and timer event as sources in the event queue
     al_register_event_source(allegro->eventQueue, al_get_timer_event_source(allegro->timer));
     al_register_event_source(allegro->eventQueue, al_get_timer_event_source(allegro->gametimer));
     al_register_event_source(allegro->eventQueue, al_get_keyboard_event_source());
 }
 
-// Initializes timer
-static void allegroInitializeTimer(void)
+static void allegroInitializeTimer(void)													// Initializes the timers
 {
-    allegro->timer = al_create_timer(1.0 / FPS);
+    allegro->timer = al_create_timer(1.0 / FPS);											//Display redraw timer
     checkInitialization(allegro->timer, "timer");
 
-    allegro->gametimer = al_create_timer(1.0 / 1);
+    allegro->gametimer = al_create_timer(1.0 / 1);											//Falling timer
     checkInitialization(allegro->gametimer, "gametimer");
     // Start timer
     al_start_timer(allegro->timer);
 }
 
-// Grabs a sprite from the spritesheet
-static ALLEGRO_BITMAP* allegroGrabSprite(int x, int y, int w, int h, SPRITES* sprites)
+static ALLEGRO_BITMAP* allegroGrabSprite(int x, int y, int w, int h, SPRITES* sprites)				// Grabs a sprite from the spritesheet
 {
     ALLEGRO_BITMAP* sprite = al_create_sub_bitmap(sprites->_sheet, x, y, w, h);
     checkInitialization(sprite, "sprite grab");
     return sprite;
 }
 
-static void destroyAllegro(SPRITES* sprites)
+static void destroyAllegro(SPRITES* sprites)						//Destroys allegro elements
 {
-    // Destroy event queue
+    // Destroys event queue
     al_destroy_event_queue(allegro->eventQueue);
 
-    // Destroy timer
+    // Destroys timer
     al_destroy_timer(allegro->timer);
     al_destroy_timer(allegro->gametimer);
 
-    // Destroy sound
+    // Destroys sound
     allegroDestroySound();
 
 
-    // Destroy sprites
+    // Destroys sprites
     allegroDestroySprites(sprites);
 
     // Destroys font
     al_destroy_font(allegro->font);
 
-    // Destroy display
+    // Destroys display
     allegroDestroyDisplay();
 }
-// Destroys all samples and music
-static void allegroDestroySound(void)
+
+static void allegroDestroySound(void)										// Destroys all samples and music
 {
     int i;
     for (i = 0; allegro->SFX[i] != NULL; i++)
     {
         al_destroy_sample(allegro->SFX[i]);
     }
-
     al_destroy_audio_stream(allegro->music);
 }
 
-// Destroys display and buffer
-static void allegroDestroyDisplay(void)
+static void allegroDestroyDisplay(void)										// Destroys display and buffer
 {
     al_destroy_display(allegro->display);
     al_destroy_bitmap(allegro->buffer);
 }
 
-// Destroys all sprite bitmaps
-static void allegroDestroySprites(SPRITES* sprites)
+static void allegroDestroySprites(SPRITES* sprites)							// Destroys all sprite bitmaps
 {
     for (int i = 0; i < LEVEL_STYLES; i++)
     {
@@ -1166,13 +1129,11 @@ static void allegroDestroySprites(SPRITES* sprites)
     al_destroy_bitmap(sprites->_sheet);
 }
 
-// Ensures correct initialization of allegro elements
-static void checkInitialization(bool test, const char* description)
+static void checkInitialization(bool test, const char* description)					// Ensures correct initialization of allegro elements
 {
     if (test) return;
 
     printf("couldn't initialize %s\n", description);
-
     exit(1);
 }
 
