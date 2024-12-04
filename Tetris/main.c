@@ -22,7 +22,7 @@ int main(void)
 	}
 	Game game;											//Main game structure is created
 	void * gamep = &game;
-    //FILE *leaderboard = fopen("leaderboard.txt", "ab+");		//Opens the file with the leaderboard keeping its content or creates one with the name shown
+    //FILE *leaderboard = fopen("leaderboard.txt", "ab+");		//This line amd the next one make sure that the leaderboard exists
     //fclose(leaderboard);
 
 	pthread_t th1,th2;
