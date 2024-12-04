@@ -22,8 +22,8 @@ int main(void)
 	}
 	Game game;											//Main game structure is created
 	void * gamep = &game;
-    FILE *leaderboard = fopen("leaderboard.txt", "ab+");		//Opens the file with the leaderboard keeping its content or creates one with the name shown
-    fclose(leaderboard);
+    //FILE *leaderboard = fopen("leaderboard.txt", "ab+");		//Opens the file with the leaderboard keeping its content or creates one with the name shown
+    //fclose(leaderboard);
 
 	pthread_t th1,th2;
 	pthread_create(&th1,NULL,th1_gamelogic, gamep); 			//Thread 1 is created
