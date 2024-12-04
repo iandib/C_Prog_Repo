@@ -125,7 +125,7 @@ void * th1_gamelogic(void* gamep)
 				}
 				else
 				{
-					game->activeTetromino.move_left = 0;				//Clear the buffer for left-movements
+					game->activeTetromino.move_left = 0;				//Clears the buffer for left-movements
 				}
 			}
 			else if(game->activeTetromino.move_right)					//This conditional checks if the tetromino was moved right. If that is a valid action then it is moved, if not, the buffer is cleared.
@@ -138,7 +138,7 @@ void * th1_gamelogic(void* gamep)
 				}
 				else
 				{
-					game->activeTetromino.move_right = 0;				//Clear the buffer for right-movements
+					game->activeTetromino.move_right = 0;				//Clears the buffer for right-movements
 				}
 			}
 			else if(game->activeTetromino.rotate_)						//This conditional checks if the tetromimo was rotated
@@ -170,7 +170,7 @@ void * th1_gamelogic(void* gamep)
 	pthread_exit(0);													//Finally, if the quit flag is activated, this process is killed
 }
 
-void initializeGame(Game* game)											//Set initial values
+void initializeGame(Game* game)											//Sets initial values
 {
 	game->gameOver = false;
 	game->frames = 0;
@@ -187,7 +187,7 @@ void initializeGame(Game* game)											//Set initial values
 
 	//initialize_leaderboard(game);										//[TO BE CHECKED]
 
-	for (int i = 0; i < GRID_HEIGHT; i++)								//Clear the game grid
+	for (int i = 0; i < GRID_HEIGHT; i++)								//Clears the game grid
 	{
 		for (int j = 0; j < GRID_WIDTH; j++)
 		{
@@ -197,19 +197,11 @@ void initializeGame(Game* game)											//Set initial values
 	}
 }
 
-static bool canMoveSideways(Game* game, int xOffset)
+static bool canMoveSideways(Game* game, int xOffset)						// Checks if the tetromino can move horizontally in the specified direction, returning true if it can, and false if it cannot
 {
-    // Calculate the new x coordinate for the tetromino
-    int newX = game->activeTetromino.x + xOffset;
-
-    // Check if the tetromino can move horizontally in the specified direction
+    int newX = game->activeTetromino.x + xOffset;    						// Calculate the new x coordinate for the tetromino. xOffset depends on the direction that the tetromino is supposed to move in
     bool canMove = true;
-    //int rotation = game->activeTetromino.rotation;
-
-    int i;
-    int j;
-    int col;
-    int row;
+    int i, j, col, row;
     for (i = TETROMINO_H - 1; i >= 0; i--)
     {
         for (j = 0; j < TETROMINO_W; j++)
@@ -218,36 +210,27 @@ static bool canMoveSideways(Game* game, int xOffset)
             {
                 row = game->activeTetromino.y + i;
                 col = newX + j;
-
-                // Check if the new position is out of bounds or collides with existing blocks
-                if (col < 0 || col >= GRID_WIDTH || row >= GRID_HEIGHT || (row >= 0 && game->grid[row][col] != 0))
+                if (col < 0 || col >= GRID_WIDTH || row >= GRID_HEIGHT || (row >= 0 && game->grid[row][col] != 0))			// Checks if the new position is out of bounds or collides with existing blocks
                 {
                     canMove = false;
                     break;
                 }
             }
         }
-
         if (!canMove)
         {
             break;
         }
     }
-
     return canMove;
 }
-
-// Checks for completed rows and clear them
-static void clearRows(Game* game)
+static void clearRows(Game* game)					// Checks for completed rows and clear them
 {
-    int numClearedRows = 0;
-    int i;
-    int j;
-    int k;
-    for (i = GRID_HEIGHT - 1; i >= 0; i--)
+    int i, j, k, numClearedRows = 0;
+    for (i = GRID_HEIGHT - 1; i >= 0; i--)				//It focuses on one row at a time, throughout the whole grid
     {
         bool isRowFull = true;
-        for (j = 0; j < GRID_WIDTH; j++)
+        for (j = 0; j < GRID_WIDTH; j++)				//If the row does have every block and no empty spaces, isRowFull keeps its value (true)
         {
             if (game->grid[i][j] == 0)
             {
@@ -257,16 +240,14 @@ static void clearRows(Game* game)
         }
         if (isRowFull)
         {
-            // Shift all rows above the cleared row down by one
-            for (k = i; k > 0; k--)
+            for (k = i; k > 0; k--)				            // Shifts all rows above the cleared row down one by one
             {
                 for (j = 0; j < GRID_WIDTH; j++)
                 {
                     game->grid[k][j] = game->grid[k - 1][j];
                 }
             }
-            // Clear the top row
-            for (j = 0; j < GRID_WIDTH; j++)
+            for (j = 0; j < GRID_WIDTH; j++)				// Clears the top row
             {
                 game->grid[0][j] = 0;
             }
@@ -274,26 +255,22 @@ static void clearRows(Game* game)
             i++;
         }
     }
-    updateScore(game, numClearedRows);
+    updateScore(game, numClearedRows);					//Clearly the score must be updated as well as the game level
     game->lines += numClearedRows;
-    if (numClearedRows)
+    if (numClearedRows)							//[TO BE CHECKED] me genera duda si realmente es necesario este if o si solo se puede dejar update level y chau.
     {
         updateLevel(game);
     }
 }
 
-// Checks if the game is over
-static bool isGameOver(const Game* game)
+static bool isGameOver(const Game* game)				// Checks if the game is over by searching for tetromino blocks in the starting position that collide with the game grid
 {
 	int i, j, row, col;
-
-	// Checks if any cells in the starting position are occupied
-
-	for (i = 0; i < TETROMINO_H; i++)
+	for (i = 0; i < TETROMINO_H; i++)				
 	{
 		for (j = 0; j < TETROMINO_W; j++)
 		{
-			if (game->activeTetromino.shape[i][j] != 0)
+			if (game->activeTetromino.shape[i][j] != 0)		//Gets the tetromino blocks coords, adds the proper off set and checks if the are colliding with the grid
 			{
 				row = game->activeTetromino.y + i;
 				col = game->activeTetromino.x + j;
@@ -306,34 +283,31 @@ static bool isGameOver(const Game* game)
 	}
     return false;
 }
-
-
 static void updateScore(Game* game, int numClearedRows)			// Updates game score based on the number of rows cleared and the current level
 {
     switch (numClearedRows)
     {
-    case 1:
-        game->score += 40 * (game->level + 1);
-        playSoundIndex(BURN);
-        break;
-    case 2:
-        game->score += 100 * (game->level + 1);
-        playSoundIndex(BURN);
-        break;
-    case 3:
-        game->score += 300 * (game->level + 1);
-        playSoundIndex(BURN);
-        break;
-    case 4:
-        game->score += 1200 * (game->level + 1);
-        playSoundIndex(TETRIS);
-        break;
-    default:
-        break;
-    }
+	    case 1:
+	        game->score += 40 * (game->level + 1);
+	        playSoundIndex(BURN);
+	        break;
+	    case 2:
+	        game->score += 100 * (game->level + 1);
+	        playSoundIndex(BURN);
+	        break;
+	    case 3:
+	        game->score += 300 * (game->level + 1);
+	        playSoundIndex(BURN);
+	        break;
+	    case 4:
+	        game->score += 1200 * (game->level + 1);
+	        playSoundIndex(TETRIS);
+	        break;
+	    default:
+	        break;
+     }
 }
-
-static void updateLevel(Game* game)								// Updates game level
+static void updateLevel(Game* game)								// Updates game level. This depends on the required number cleared lines for leveling up (which additionally depends on the current game level)
 {
     if (game->lines >= game->levelCheckpoint)
     {
@@ -341,13 +315,12 @@ static void updateLevel(Game* game)								// Updates game level
         game->levelCheckpoint += 10;
     }
 }
-
-void generateNewTetromino(Game* game)							// Generate a new random tetromino
+void generateNewTetromino(Game* game)							// Generates a new random tetromino
 {
-    int shapeIndex = rand() % NUM_SHAPES;						// Randomly select a shape index for the new tetromino
-    if (game->frames)											// If the game have already started
+    int shapeIndex = rand() % NUM_SHAPES;						// Randomly selects a shape index for the new tetromino
+    if (game->frames)									// If the game has already started
     {
-        if (game->nextTetromino.shapeIndex == I)		        // Update the active tetromino with the new shape and position
+        if (game->nextTetromino.shapeIndex == I)		       			 // Updates the active tetromino with the new shape and position. Corrects the tetromino initial position
         {
             game->activeTetromino.x = game->nextTetromino.x - 1;
             game->activeTetromino.y = game->nextTetromino.y - 1;
@@ -359,13 +332,13 @@ void generateNewTetromino(Game* game)							// Generate a new random tetromino
         }
         copyShape(game->nextTetromino.shape, game, true);						//Copies the next tetromino's values to the active
         game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
-		game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
-		game->activeTetromino.rotation = game->nextTetromino.rotation;
-		game->activeTetromino.move_down = game->nextTetromino.move_down;
-		game->activeTetromino.move_up = game->nextTetromino.move_up;
-		game->activeTetromino.move_left = game->nextTetromino.move_left;
-		game->activeTetromino.move_right = game->nextTetromino.move_right;
-		game->activeTetromino.rotate_ = game->nextTetromino.rotate_;
+	game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
+	game->activeTetromino.rotation = game->nextTetromino.rotation;
+	game->activeTetromino.move_down = game->nextTetromino.move_down;
+	game->activeTetromino.move_up = game->nextTetromino.move_up;
+	game->activeTetromino.move_left = game->nextTetromino.move_left;
+	game->activeTetromino.move_right = game->nextTetromino.move_right;
+	game->activeTetromino.rotate_ = game->nextTetromino.rotate_;
         game->statistics[game->nextTetromino.shapeIndex]++;
 
         game->nextTetromino.x = GRID_WIDTH / 2 - 1;
@@ -373,15 +346,15 @@ void generateNewTetromino(Game* game)							// Generate a new random tetromino
         copyShape(tetrominoShapes[shapeIndex][0], game, false);					//Copies the next tetromino shape that was chosen with rand() to the next tetromino shape matrix in the game structure
         game->nextTetromino.shapeIndex = shapeIndex;
     }
-    else																		//If we still need to create the first active tetromino
+    else											//If we still need to create the first active tetromino (in case we are initializing a new game)
     {
-        game->nextTetromino.x = GRID_WIDTH / 2 - 1;						        // Update the next tetromino with the new shape and position
+        game->nextTetromino.x = GRID_WIDTH / 2 - 1;						// Update the next tetromino with the new shape and position
         game->nextTetromino.y = 0;
         copyShape(tetrominoShapes[shapeIndex][0], game, false);					//Copies the next tetromino shape that was chosen with rand() to the next tetromino shape matrix in the game structure
         game->nextTetromino.shapeIndex = shapeIndex;
 
-        shapeIndex = rand() % NUM_SHAPES;
-        if (shapeIndex == I)
+        shapeIndex = rand() % NUM_SHAPES;							// Randomly selects a shape index for the new tetromino
+        if (shapeIndex == I)									//Corrects the tetromino initial position
         {
             game->activeTetromino.x = GRID_WIDTH / 2 - 2;
             game->activeTetromino.y = -1;
@@ -392,24 +365,22 @@ void generateNewTetromino(Game* game)							// Generate a new random tetromino
             game->activeTetromino.y = 0;
         }
 
-    	for (int i = 0; i < NUM_SHAPES; i++)									//Clear the shape statistics array
+    	for (int i = 0; i < NUM_SHAPES; i++)							//Clears the shape statistics array
     	{
     		game->statistics[i] = 0;
     	}
         copyShape(tetrominoShapes[shapeIndex][0], game, true);					//Copies another tetromino shape randomly chosen to the active tetromino shape matrix
-        game->activeTetromino.shapeIndex = shapeIndex;							// Update the new next tetromino with the new shape and position
-        game->statistics[shapeIndex]++;
-
+        game->activeTetromino.shapeIndex = shapeIndex;						// Updates the new next tetromino with the new shape and position
+        game->statistics[shapeIndex]++;								// Updates the shape statistics, according to the tetromino that was generated
 
     }
-    game->nextTetromino.rotation = 0;											//Basic initial values are set for the next tetromino
+    game->nextTetromino.rotation = 0;								//Basic initial values are set for the next tetromino
     game->nextTetromino.move_down = 0;
     game->nextTetromino.move_up = 0;
     game->nextTetromino.move_left = 0;
     game->nextTetromino.move_right = 0;
     game->nextTetromino.rotate_ = 0;
 }
-
 static bool canMoveDown(const Game* game)						// Checks if the active tetromino can move down
 {
     for (int i = 0; i < TETROMINO_H; i++)						// Checks if any cells below the tetromino are occupied or if it has reached the bottom of the grid
@@ -430,60 +401,54 @@ static bool canMoveDown(const Game* game)						// Checks if the active tetromino
     return true;
 }
 
-// Copies tetromino shape onto either active or next tetromino
-static void copyShape(const int source[TETROMINO_H][TETROMINO_W], Game* game, bool active)
+static void copyShape(const int source[TETROMINO_H][TETROMINO_W], Game* game, bool active)			// Copies tetromino shape onto either active or next tetromino, depending on the bool active
 {
-    int i;
-    int j;
-    if (active)
-    {
-        for (i = 0; i < TETROMINO_H; i++)
-        {
-            for (j = 0; j < TETROMINO_W; j++)
-            {
-                game->activeTetromino.shape[i][j] = source[i][j];
-            }
-        }
-    }
-    else
-    {
-        for (i = 0; i < TETROMINO_H; i++)
-        {
-            for (j = 0; j < TETROMINO_W; j++)
-            {
-                game->nextTetromino.shape[i][j] = source[i][j];
-            }
-        }
-    }
+	int i, j;
+	if (active)
+	{
+		for (i = 0; i < TETROMINO_H; i++)
+		{
+			for (j = 0; j < TETROMINO_W; j++)
+			{
+				game->activeTetromino.shape[i][j] = source[i][j];
+			}
+		}
+	}
+	else
+	{
+		for (i = 0; i < TETROMINO_H; i++)
+		{
+			for (j = 0; j < TETROMINO_W; j++)
+			{
+				game->nextTetromino.shape[i][j] = source[i][j];
+			}
+		}
+	}
 }
 
-// Fixes the tetromino in its current position on the game grid
-static void fixTetromino(Game* game)
+static void fixTetromino(Game* game)						// Fixes the tetromino in its current position on the game grid
 {
-    int i;
-    int j;
-    // Updates the game grid with the tetromino's occupied cells
-    for (i = 0; i < TETROMINO_H; i++)
-    {
-        for (j = 0; j < TETROMINO_W; j++)
-        {
-            if (game->activeTetromino.shape[i][j] != 0)
-            {
-                int row = game->activeTetromino.y + i;
-                int col = game->activeTetromino.x + j;
-                game->grid[row][col] = 1;
-                updateColorMap(game, row, col);
-            }
-        }
-    }
+	int i, j;
+	for (i = 0; i < TETROMINO_H; i++)						// Updates the game grid with the tetromino's occupied cells
+	{
+		for (j = 0; j < TETROMINO_W; j++)
+		{
+			if (game->activeTetromino.shape[i][j] != 0)
+			{
+				int row = game->activeTetromino.y + i;
+				int col = game->activeTetromino.x + j;
+				game->grid[row][col] = 1;
+				updateColorMap(game, row, col);
+			}
+		}
+	}
 	playSoundIndex(FIX);
 }
 
-static void rotate(Game* game)
+static void rotate(Game* game)									// Checks if the new rotation is valid, if it is, it is done
 {
 	int oldRotation = game->activeTetromino.rotation;
-	int newRotation = (oldRotation + 1) % 4;
-															// Checks if the new rotation is valid
+	int newRotation = (oldRotation + 1) % 4;						
 	bool canRotate = true;
 	int i;
 	int j;
@@ -495,18 +460,18 @@ static void rotate(Game* game)
 			{
 				int row = game->activeTetromino.y + i;
 				int col = game->activeTetromino.x + j;
-				if (col < 0 || col >= GRID_WIDTH || row <= -1 || row >= GRID_HEIGHT || (row >= 0 && game->grid[row][col] != 0))
+				if (col < 0 || col >= GRID_WIDTH || row <= -1 || row >= GRID_HEIGHT || (row >= 0 && game->grid[row][col] != 0))			//Checks if the rotated tetromino blocks are well located or they exceed the limits of grid/collide with it
 				{
-					canRotate = false;						//As the tetromino cannot rotate, the program must leave this section. Because of this, both of the for cicles have to be broken.
-					j = TETROMINO_W;
+					canRotate = false;						//As the tetromino cannot rotate, the program must leave this section
+					j = TETROMINO_W;						//Conditions to leave both of the for cycles
 					i = TETROMINO_H;
 				}
 			}
 		}
 	}
-	if (canRotate)
+	if (canRotate)	
 	{
-		game->activeTetromino.rotation = newRotation;				//Updates the rotation of the tetromino
+		game->activeTetromino.rotation = newRotation;						//Since there is no problem with the new rotation, it is updated.
 		for (i = 0; i < TETROMINO_H; i++)
 		{
 			for (j = 0; j < TETROMINO_W; j++)
@@ -519,28 +484,28 @@ static void rotate(Game* game)
 	}
 	else
 	{
-		game->activeTetromino.rotate_ = 0;
+		game->activeTetromino.rotate_ = 0;							//In case it could not be rotated, the rotation buffer is cleared
 	}
 }
-static void updateColorMap(Game* game, int row, int col)
+static void updateColorMap(Game* game, int row, int col)						//Makes that the recently fixed tetromino maintains its color 
 {
 	#ifdef PC
 	switch (game->activeTetromino.shapeIndex)
-	    {
-			case I:
-			case O:
-			case T:
-				game->tetrominoGrid[row][col] = BLOCK_TYPES * (game->level % LEVEL_STYLES) + WHITE;
-				break;
-			case L:
-			case Z:
-				game->tetrominoGrid[row][col] = BLOCK_TYPES * (game->level % LEVEL_STYLES) + LIGHT;
-				break;
-			case J:
-			case S:
-				game->tetrominoGrid[row][col] = (BLOCK_TYPES * game->level % LEVEL_STYLES) + DARK;
-				break;
-	    }
+	{
+		case I:
+		case O:
+		case T:
+			game->tetrominoGrid[row][col] = BLOCK_TYPES * (game->level % LEVEL_STYLES) + WHITE;
+			break;
+		case L:
+		case Z:
+			game->tetrominoGrid[row][col] = BLOCK_TYPES * (game->level % LEVEL_STYLES) + LIGHT;
+			break;
+		case J:
+		case S:
+			game->tetrominoGrid[row][col] = (BLOCK_TYPES * game->level % LEVEL_STYLES) + DARK;
+			break;
+	}
 	#endif
 }
 
