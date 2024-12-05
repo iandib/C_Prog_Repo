@@ -21,7 +21,9 @@
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_image.h>
 #else
-///////////		RASPY LIBRARY
+#include "disdrv.h"  // Archivo de cabecera del display
+#include "joydrv.h"   // Archivo de cabecera del joystick
+#include "libaudio.h"	// Archivo de cabecera del audio
 #endif
 
 /*******************************************************************************
@@ -166,6 +168,24 @@ static ALLEGRO_ELEMENTS allegroElements = { 0 };
 static ALLEGRO_ELEMENTS* allegro = &allegroElements;
 
 #else
+
+static void draw_board(Game* game);
+static void showNext(Game* game);
+static void showLevel(Game* game);
+static void joyUpdateValues();
+static void dispUpdateValues();
+static bool checkPasue();
+static bool checkResume();
+static bool checkRestart();
+static void initializeRaspy();
+static void raspyDisplayClearPreDraw();
+static void draw_tetromino(Game* game);
+static void clearDisp();
+static bool checkQuit();
+static void raspyShowScore(int score);
+static void destroyRaspy();
+static void raspyPlaySound(int soundIndex);
+
 #endif
 
 static void checkInitialization(bool test, const char* description);
@@ -329,6 +349,79 @@ void * th2_display_sound(void* gamep)
 	destroyAllegro(&sprites);
 	pthread_exit(NULL);
 #else
+    initializeRaspy();
+    while(!game->quit)
+    {
+        while (game.menu && !game.quit)
+        {
+            pauseAudio();
+            joyUpdateValues();
+            raspyMenu(game);
+            if (movedRight())
+            {
+                unpauseAudio();
+                game->menu = false;
+                disp_clear();
+                disp_update();
+            }
+            else if (movedLeft())
+            {
+                game->quit = true;
+                game->menu = false;
+                disp_clear();
+                disp_update();
+            }
+        }
+        while (!game.menu && !game.quit)
+        {
+            game.gameOver = false;
+            while (!game.gameOver && !game.menu && !game.quit)
+            {
+                game->frames += 10;
+                joyUpdateValues();
+
+                updateGame(game);
+                updateMovement(game);
+                
+                drawHud(game);
+                drawGame(game);
+
+                game->pause = checkPasue();
+                while (game->pause)
+                {
+                    joyUpdateValues();
+                    if (checkResume())
+                    {
+                        break;
+                    }
+                    else if (checkRestart())
+                    {
+                        initializeGame(game);
+                        game->menu = false;
+                        break;
+                    }
+                    else if (checkQuit())
+                    {
+                        initializeGame(game);
+                        clearDisp();
+                        break;
+                    }
+                }
+                if (isGameOver(game)) 
+                {
+                    while (!checkRestart()) 
+                    {
+                        joyUpdateValues();
+                        drawNewHighScore(game->score, 1);
+                    }
+                    initializeGame(game);
+                }
+            }
+        }
+                
+    }
+    destroyRaspy();
+    pthread_exit(NULL);
 #endif
 }
 void playSoundIndex(int soundIndex)
@@ -336,7 +429,7 @@ void playSoundIndex(int soundIndex)
 	#ifdef PC
 	al_play_sample(allegro->SFX[soundIndex], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 	#else
-		raspyPlaySound(soundIndex);
+	raspyPlaySound(soundIndex);
 	#endif
 }
 
@@ -1138,5 +1231,323 @@ static void checkInitialization(bool test, const char* description)					// Ensur
 }
 
 #else
+
+static void draw_board(Game* game) {
+    dcoord_t coords;
+    for (int i = 0; i < GRID_HEIGHT; i++)
+    {
+        for (int j = 0; j < GRID_WIDTH; j++)
+        {
+            if (game->grid[i][j])
+            {
+                coords.x = j;
+                coords.y = i;
+                if (coords.x >= 0 && coords.x <= DISP_MAX_X && coords.y >= 0 && coords.y <= DISP_MAX_Y) {
+                    disp_write(coords, D_ON);
+                }
+            }
+            else
+            {
+                coords.x = j;
+                coords.y = i;
+                if (coords.x >= 0 && coords.x <= DISP_MAX_X && coords.y >= 0 && coords.y <= DISP_MAX_Y) {
+                    disp_write(coords, D_OFF);
+                }
+            }
+        }
+    }
+    disp_update();
+}
+
+static void draw_tetromino(Game* game)
+{
+    dcoord_t coords;
+    for (int i = 0; i < TETROMINO_H; i++)
+    {
+        for (int j = 0; j < TETROMINO_W; j++)
+        {
+            if (game->activeTetromino.shape[i][j])
+            {
+                coords.x = j + game->activeTetromino.x;
+                coords.y = i + game->activeTetromino.y;
+                if (coords.x >= 0 && coords.x <= DISP_MAX_X && coords.y >= 0 && coords.y <= DISP_MAX_Y) {
+                    disp_write(coords, D_ON);
+                }
+            }
+        }
+    }
+    disp_update();
+}
+
+static void joyUpdateValues() {
+    joy_update();
+}
+
+static void clearDisp() {
+    disp_clear();
+}
+
+static void showNext(Game* game)
+{
+    dcoord_t coords;
+    for (int i = 0; i < TETROMINO_H; i++)
+    {
+        for (int j = 0; j < TETROMINO_W; j++)
+        {
+            coords.x = j + 11;
+            coords.y = i;
+            disp_write(coords, D_OFF);
+        }
+    }
+    for (int i = 0; i < TETROMINO_H; i++)
+    {
+        for (int j = 0; j < TETROMINO_W; j++)
+        {
+            if (game->nextTetromino.shape[i][j])
+            {
+                coords.x = j + 11;
+                coords.y = i;
+                disp_write(coords, D_ON);
+            }
+        }
+    }
+    disp_update();
+}
+
+static void showLevel(Game* game)
+{
+    int x = 11;
+    dcoord_t coords;
+    coords.x = x + game->level % 5;
+    coords.y = 10 + (int)game->level / 5;
+    disp_write(coords, D_ON);
+    disp_update();
+}
+
+static bool checkPasue()
+{
+    jcoord_t coord = joy_get_coord();
+    if (coord.y > JOY_MAX_POS / 2)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static bool checkQuit()
+{
+    jswitch_t state = joy_get_switch();
+    if (state)
+    {
+        pauseAudio();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static bool checkResume()
+{
+    jcoord_t coord = joy_get_coord();
+    if (coord.x < JOY_MAX_NEG / 2)
+    {
+        unpauseAudio();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static bool checkRestart()
+{
+    jcoord_t coord = joy_get_coord();
+    if (coord.x > JOY_MAX_POS / 2)
+    {
+        unpauseAudio();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static void initializeRaspy()
+{
+    joy_init();
+    initAudio();
+
+    raspySounds[BURN] = LINE;
+    raspySounds[GAME_OVER] = LOSE;
+    raspySounds[MOVE_SIDEWAYS] = MOVE;
+    raspySounds[TETRIS] = LEVEL;
+    raspySounds[ROTATE] = ROT;
+
+    disp_init();
+    disp_clear();
+    disp_update();
+    playMusic(GAME, SDL_MIX_MAXVOLUME / 2);
+    srand(time(NULL));
+}
+
+static void raspyPlaySound(int soundIndex)
+{
+    playSound(raspySounds[soundIndex], SDL_MIX_MAXVOLUME);
+}
+
+static void raspyDisplayClearPreDraw()
+{
+    disp_clear();
+}
+
+static void raspyShowScore(int score) {
+    // Si el puntaje es 0, dibuja el dígito 0 y retorna
+    if (score == 0) {
+        // Desplaza el número de derecha a izquierda en el LED
+        for (int offset_x = 16 - 6, offset_y = 8 - 4; offset_x >= -6; offset_x--) {
+            // Borra el contenido actual del buffer
+            disp_clear();
+
+            for (int j = 0; j < 8; j++) {
+                for (int k = 0; k < 6; k++) {
+                    if (k + offset_x >= 0 && k + offset_x < 16) {
+                        int x = k + offset_x;
+                        int y = j + offset_y;
+
+                        if (digitMatrices[0][j][k] == 1 && y >= 0 && y < 16) {
+                            dcoord_t point = { x, y };
+                            disp_write(point, D_ON);
+                        }
+                    }
+                    joyUpdateValues();
+                    if (checkRestart()) {
+                        disp_clear();
+                        disp_update();
+                        return;
+                    }
+                }
+            }
+
+
+            // Actualiza el display
+            disp_update();
+
+            // Espera un tiempo (ajusta según sea necesario)
+            usleep(50000); // 50 milisegundos
+        }
+        return;
+    }
+
+    // Convierte el número en un array de dígitos
+    int digits_array[6];
+    for (int i = 5; i >= 0; i--) {
+        digits_array[i] = score % 10;
+        score /= 10;
+    }
+
+    // Encuentra el primer dígito no cero
+    int firstNonZero = 0;
+    while (firstNonZero < 6 && digits_array[firstNonZero] == 0) {
+        firstNonZero++;
+    }
+
+    // Desplaza el número de derecha a izquierda en el LED
+    for (int offset_x = 16 - 6, offset_y = 8 - 4; offset_x >= -6 - 30; offset_x--) {
+        // Borra el contenido actual del buffer
+        disp_clear();
+
+        // Coloca los dígitos en el buffer con el desplazamiento actual
+        for (int i = firstNonZero; i < 6; i++) {
+            int x_start = (i - firstNonZero) * 6;
+
+            for (int j = 0; j < 8; j++) {
+                for (int k = 0; k < 6; k++) {
+                    if (x_start + k + offset_x >= 0 && x_start + k + offset_x < 16) {
+                        int x = x_start + k + offset_x;
+                        int y = j + offset_y;
+
+                        if (digitMatrices[digits_array[i]][j][k] == 1 && y >= 0 && y < 16) {
+                            dcoord_t point = { x, y };
+                            disp_write(point, D_ON);
+                        }
+                    }
+                    joyUpdateValues();
+                    if (checkRestart()) {
+                        disp_clear();
+                        disp_update();
+                        return;
+                    }
+                }
+            }
+        }
+
+        // Actualiza el display
+        disp_update();
+
+        // Espera un tiempo (ajusta según sea necesario)
+        usleep(50000); // 50 milisegundos
+    }
+}
+
+
+static void dispUpdateValues()
+{
+    disp_update();
+}
+
+static void destroyRaspy()
+{
+    endAudio();
+}
+
+static void raspyMenu(Game* game) {
+    dcoord_t coord;
+
+    // P en el 8x8 superior izquierdo
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            coord.x = j;
+            coord.y = i;
+            disp_write(coord, menuMatrices[0][i][j]);
+        }
+    }
+
+    // Flecha hacia arriba en el 8x8 superior derecho
+    for (int i = 0; i < 8; ++i) {
+        for (int j = 8; j < 16; ++j) {
+            coord.x = j;
+            coord.y = i;
+            disp_write(coord, menuMatrices[2][i][j - 8]);
+        }
+    }
+
+    // Q en el 8x8 inferior izquierdo
+    for (int i = 8; i < 16; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            coord.x = j;
+            coord.y = i;
+            disp_write(coord, menuMatrices[1][i - 8][j]);
+        }
+    }
+
+    // Flecha hacia abajo en el 8x8 inferior derecho
+    for (int i = 8; i < 16; ++i) {
+        for (int j = 8; j < 16; ++j) {
+            coord.x = j;
+            coord.y = i;
+            disp_write(coord, menuMatrices[3][i - 8][j - 8]);
+        }
+    }
+
+    // Actualizar la pantalla
+    disp_update();
+}
 #endif
 
