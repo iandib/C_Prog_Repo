@@ -429,7 +429,7 @@ void * th2_display_sound(void* gamep)
                         break;
                     }
                 }
-                if (game->gameOver) 
+                if (game->gameOver)
                 {
                     while (!checkRestart()) 
                     {
