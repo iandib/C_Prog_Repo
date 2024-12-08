@@ -12,7 +12,7 @@
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-#define PC true
+//#define PC true
 
 #define NUM_SHAPES 7
 #define TETROMINO_W 4
