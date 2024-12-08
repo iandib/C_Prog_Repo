@@ -1,3 +1,9 @@
+/***************************************************************************//**
+  @file     +common.h
+  @brief    +Common constants and functions
+  @author   +Helou, Luchelli, Segura
+ ******************************************************************************/
+
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
@@ -6,13 +12,12 @@
   ******************************************************************************/
 
 #include <stdbool.h>
-#include <pthread.h>
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-#define PC true
+//#define PC true
 
 #define NUM_SHAPES 7
 #define TETROMINO_W 4
@@ -71,40 +76,52 @@ typedef struct {
     int rotation;
     int shape[TETROMINO_H][TETROMINO_W];
     int shapeIndex;
-    int move_down;			//Add to the recover/save functions!!!
-    int move_up;
-    int move_left;
-    int move_right;
-    int rotate_;
+    int moveTimer;
+    int rotateTimer;
 } Tetromino;
 
-typedef struct{
-	char name[4];
-	int score;
-} player_t;
-
 typedef struct {
-    int grid[GRID_HEIGHT][GRID_WIDTH]; // Game grid		-SAVE
-    int tetrominoGrid[GRID_HEIGHT][GRID_WIDTH]; // Specific tetromino block grid	-SAVE
-    Tetromino activeTetromino; // Active tetromino		-SAVE
-    Tetromino nextTetromino; // Next tetromino			-SAVE
-    long score; // Score								-SAVE
+    int grid[GRID_HEIGHT][GRID_WIDTH]; // Game grid
+    int tetrominoGrid[GRID_HEIGHT][GRID_WIDTH]; // Specific tetromino block grid
+    Tetromino activeTetromino; // Active tetromino
+    Tetromino nextTetromino; // Next tetromino
+    long score; // Score
     int highScoreIndex; // Highscore index
-    player_t leaderboard[11];	//Leaves an space at the end to store the current player data
-    int level; // Level									-SAVE
+    int level; // Level
     bool gameOver; // Game over flag
     long frames; // Frame counter
     int lines; // Cleared lines counter
     int levelCheckpoint; // Level checkpoint
-    int fixDelay; // Bottom row movement buffer	//SACO
+    int fixDelay; // Bottom row movement buffer
     bool quit; // Quit flag
     bool pause; // Pause flag
     bool redraw; // Redraw flag
-    bool waitingForExit; // Waiting for exit flag	//SACO
+    bool waitingForExit; // Waiting for exit flag
     bool menu; // Menu flag
     int statistics[NUM_SHAPES]; // Statistics
-}Game;
+} Game;
+
+/*******************************************************************************
+ * VARIABLE PROTOTYPES WITH GLOBAL SCOPE
+ ******************************************************************************/
+
+ // +ej: extern unsigned int anio_actual;+
 
 
+/*******************************************************************************
+ * FUNCTION PROTOTYPES WITH GLOBAL SCOPE
+ ******************************************************************************/
+
+/**
+* @brief Copies tetromino shape onto either active or next tetromino
+* @param source Tetromino shape to be copied
+* @param game Pointer to game structure
+* @param active Whether the shape is to be copied onto the active tetromino or the next tetromino
+*/
+void copyShape(const int source[TETROMINO_H][TETROMINO_W], Game* game, bool active);
+
+
+/*******************************************************************************
+ ******************************************************************************/
 
 #endif // _COMMON_H_

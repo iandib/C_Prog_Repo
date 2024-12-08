@@ -1,0 +1,19 @@
+tetris: main.o gameLogic.o handler.o common.o allegro.o
+	gcc main.o gameLogic.o handler.o common.o allegro.o -o tetris -g -Wall
+ 
+main.o: main.c gameLogic.h common.h
+	gcc -c main.c -o main.o -Wall -g
+
+gameLogic.o: gameLogic.c gameLogic.h handler.h common.h 
+	gcc -c gameLogic.c -o gameLogic.o -Wall -g
+
+handler.o: handler.c handler.h allegro.h
+	gcc -c handler.c -o handler.o -Wall -g
+	
+allegro.o: allegro.c allegro.h common.h
+	gcc allegro.c -c -Wall -g
+
+common.o: common.c common.h
+	gcc -c common.c -o common.o -Wall -g
+clean:
+	rm *.o

@@ -1,0 +1,19 @@
+tetris: main.o gameLogic.o handler.o common.o raspy.o ../libs/joydisp/joydrv.o ../libs/joydisp/disdrv.o ../libs/audio/SDL2/libAudioSDL2.o
+	gcc main.o gameLogic.o handler.o common.o raspy.o ../libs/joydisp/joydrv.o ../libs/joydisp/disdrv.o ../libs/audio/SDL2/libAudioSDL2.o -o tetris -g -Wall -lSDL2 -L/home/pi/tpf/libAudioSDL2.o
+ 
+main.o: main.c gameLogic.h common.h
+	gcc -c main.c -o main.o -Wall -g
+
+gameLogic.o: gameLogic.c gameLogic.h handler.h common.h 
+	gcc -c gameLogic.c -o gameLogic.o -Wall -g
+
+handler.o: handler.c handler.h raspy.h
+	gcc -c handler.c -o handler.o -Wall -g
+
+raspy.o: raspy.c raspy.h common.h ../libs/joydisp/disdrv.h ../libs/joydisp/joydrv.h ../libs/audio/SDL2/src/audio.h
+	gcc -c raspy.c -o raspy.o -Wall -g
+	
+common.o: common.c common.h
+	gcc -c common.c -o common.o -Wall -g
+clean:
+	rm *.o

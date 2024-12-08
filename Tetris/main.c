@@ -1,35 +1,35 @@
-/*
- * main.c
- *
- *  Created on: Nov 25, 2024
- */
+#include "gameLogic.h"
+#include "handler.h"
 
-#include "th1_gamelogic.h"
-#include "th2_display_sound.h"
-#include <pthread.h>
-#include <semaphore.h>
-#include <stdio.h>
-
-sem_t s;					//This global semaphore will stop the execution of th1_gamelogic as long as the user is not playing.
-
-
-int main(void)
+int main()
 {
-	if (sem_init(&s, 1, 1) != 0)					//The semaphore is initialized as binary, shared between threads
-	{
-	// Error: initialization failed
-		return 1;
-	}
-	Game game;											//Main game structure is created
-	void * gamep = &game;
-    //FILE *leaderboard = fopen("leaderboard.txt", "ab+");		//This line amd the next one make sure that the leaderboard exists
-    //fclose(leaderboard);
+    initializeElements();
 
-	pthread_t th1,th2;
-	pthread_create(&th1,NULL,th1_gamelogic, gamep); 			//Thread 1 is created
-	pthread_create(&th2,NULL,th2_display_sound, gamep); 		//Thread 2 is created
-	pthread_join(th1,gamep);
-	pthread_join(th2,gamep);
-	return 0;
+    // Create game instance
+    Game game = { 0 };
+
+    // Start Game
+    initializeGame(&game);
+	
+	
+	 while (!game.quit)
+	 {
+        // Menu loop
+        while (game.menu && !game.quit)
+		{
+			menuLoop(&game);
+		}
+        // Game loop
+        while (!game.menu && !game.quit)
+        {
+            game.gameOver = false;
+            while (!game.gameOver && !game.menu && !game.quit)
+            {
+                gameLoop(&game);
+            }
+        }
+    }
+    destroyElements();
+
+    return 0;
 }
-
