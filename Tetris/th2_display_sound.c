@@ -372,6 +372,7 @@ void * th2_display_sound(void* gamep)
 	destroyAllegro(&sprites);
 	pthread_exit(NULL);
 #else
+	int fall = 5;
     initializeRaspy();
     while(!game->quit)
     {
@@ -403,7 +404,11 @@ void * th2_display_sound(void* gamep)
             {
                 game->frames += 10;
                 joy_update();
-
+		switch(fall)
+                {
+                	case 0: game->activeTetromino.move_down++; fall = 5; break;
+               		default: fall -= 1; break;
+                }
                 //ACA
                 if(movedUp())
                 {
