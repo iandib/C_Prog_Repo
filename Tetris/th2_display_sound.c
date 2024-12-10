@@ -13,6 +13,7 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+#include <SDL2/SDL.h>
 
 #ifdef PC
 #include <allegro5/allegro5.h>
@@ -24,8 +25,9 @@
 #include <allegro5/allegro_image.h>
 
 #else
-#include "joydisp/disdrv.h"  // Archivo de cabecera del display
-#include "joydisp/joydrv.h"   // Archivo de cabecera del joystick
+#include "../libs/joydisp/disdrv.h"  // Archivo de cabecera del display
+#include "../libs/joydisp/joydrv.h"   // Archivo de cabecera del joystick
+#include "../libs/audio/SDL2/src/audio.h"   // Archivo de cabecera del joystick
 #endif
 
 /*******************************************************************************
@@ -85,7 +87,8 @@
 #define LEVEL "tetris.wav"
 
 char * raspySoundArray [10] = {0};
-char* raspySounds[10] = &raspySoundArray;
+char** raspySounds = &raspySoundArray;
+
 
 #endif
 
@@ -180,6 +183,9 @@ static void allegroDestroySound(void);
 static void allegroDestroyDisplay(void);
 static void allegroDestroySprites(SPRITES* sprites);
 
+static void checkInitialization(bool test, const char* description);
+static void save_game(Game* game);
+
 static ALLEGRO_ELEMENTS allegroElements = { 0 };
 static ALLEGRO_ELEMENTS* allegro = &allegroElements;
 
@@ -188,15 +194,10 @@ static ALLEGRO_ELEMENTS* allegro = &allegroElements;
 static void draw_board(Game* game);
 static void showNext(Game* game);
 static void showLevel(Game* game);
-static void joyUpdateValues();
-static bool checkPasue();
-static bool checkResume();
-static bool checkRestart();
+static bool checkPause();
 static void initializeRaspy();
-static void raspyDisplayClearPreDraw();
 static void draw_tetromino(Game* game);
-static void clearDisp();
-static bool checkQuit();
+
 static void raspyShowScore(int score);
 static void raspyPlaySound(int soundIndex);
 static void raspyMenu(Game* game);
@@ -204,15 +205,18 @@ static void raspyMenu(Game* game);
 extern int digitMatrices[10][8][6];
 extern int menuMatrices[4][8][8];
 
+static bool movedLeft();
+static bool movedRight();
+static bool movedDown();
+static bool movedUp();
+static bool switch_pressed();
+
 #endif
 
-static void checkInitialization(bool test, const char* description);
-
 static int compare(const void* p1, const void* p2);
-static void update_leaderboard(Game* game);
-static void save_game(Game* game);
 
 void initialize_leaderboard(Game* game);
+static void update_leaderboard(Game* game);
 void recover_game(Game* game);
 void * th2_display_sound(void* game);
 void playSoundIndex(int soundIndex);
@@ -374,17 +378,18 @@ void * th2_display_sound(void* gamep)
         while (game->menu && !game->quit)
         {
             pauseAudio();
-            joyUpdateValues();
+            joy_update();
             raspyMenu(game);
-            if (checkRestart())
+            if (movedRight())
             {
-                unpauseAudio();
                 game->menu = false;
                 disp_clear();
                 disp_update();
+                sem_post(&s);
             }
-            else if (checkResume())
+            else if (movedLeft())
             {
+                unpauseAudio();
                 game->quit = true;
                 game->menu = false;
                 disp_clear();
@@ -397,44 +402,65 @@ void * th2_display_sound(void* gamep)
             while (!game->gameOver && !game->menu && !game->quit)
             {
                 game->frames += 10;
-                joyUpdateValues();
+                joy_update();
 
                 //ACA
-                
+                if(movedUp())
+                {
+                    game->activeTetromino.rotate_++;
+                }
+                else if(movedDown())
+                {
+                    game->activeTetromino.move_down++;
+                }
+                else if(movedLeft())
+                {
+                    game->activeTetromino.move_left++;
+                }
+                else if(movedRight())
+                {
+                    game->activeTetromino.move_right++;
+                }
                 draw_board(game);
                 showLevel(game);
                 showNext(game);
                 draw_tetromino(game);
 
-                game->pause = checkPasue();
+                game->pause = switch_pressed();
                 while (game->pause)
                 {
-                    joyUpdateValues();
-                    if (checkResume())
+                    joy_update();
+                    if (movedLeft())
                     {
+                        unpauseAudio();
+                        sem_post(&s);
                         break;
                     }
-                    else if (checkRestart())
+                    else if (movedRight())
                     {
+                        unpauseAudio();
                         initializeGame(game);
                         game->menu = false;
+                        sem_post(&s);
                         break;
                     }
-                    else if (checkQuit())
+                    else if (switch_pressed())
                     {
+                        pauseAudio();
                         initializeGame(game);
-                        clearDisp();
+                        disp_clear();
                         break;
                     }
                 }
                 if (game->gameOver)
                 {
-                    while (!checkRestart()) 
+                    while (!movedRight()) 
                     {
-                        joyUpdateValues();
+                        joy_update();
                         raspyShowScore(game->score);
                     }
                     initializeGame(game);
+                    sem_post(&s);
                 }
             }
         }
@@ -1299,14 +1325,6 @@ static void draw_tetromino(Game* game)
     disp_update();
 }
 
-static void joyUpdateValues() {
-    joy_update();
-}
-
-static void clearDisp() {
-    disp_clear();
-}
-
 static void showNext(Game* game)
 {
     dcoord_t coords;
@@ -1357,47 +1375,7 @@ static bool checkPasue()
     }
 }
 
-static bool checkQuit()
-{
-    jswitch_t state = joy_get_switch();
-    if (state)
-    {
-        pauseAudio();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
-static bool checkResume()
-{
-    jcoord_t coord = joy_get_coord();
-    if (coord.x < JOY_MAX_NEG / 2)
-    {
-        unpauseAudio();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-static bool checkRestart()
-{
-    jcoord_t coord = joy_get_coord();
-    if (coord.x > JOY_MAX_POS / 2)
-    {
-        unpauseAudio();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 static void initializeRaspy()
 {
@@ -1422,11 +1400,6 @@ static void raspyPlaySound(int soundIndex)
     playSound(raspySounds[soundIndex], SDL_MIX_MAXVOLUME);
 }
 
-static void raspyDisplayClearPreDraw()
-{
-    disp_clear();
-}
-
 static void raspyShowScore(int score) {
     // Si el puntaje es 0, dibuja el dígito 0 y retorna
     if (score == 0) {
@@ -1446,8 +1419,9 @@ static void raspyShowScore(int score) {
                             disp_write(point, D_ON);
                         }
                     }
-                    joyUpdateValues();
-                    if (checkRestart()) {
+                    joy_update();
+                    if (movedRight()) {
+                        unpauseAudio();
                         disp_clear();
                         disp_update();
                         return;
@@ -1498,8 +1472,9 @@ static void raspyShowScore(int score) {
                             disp_write(point, D_ON);
                         }
                     }
-                    joyUpdateValues();
-                    if (checkRestart()) {
+                    joy_update();
+                    if (movedRight()) {
+                        unpauseAudio();
                         disp_clear();
                         disp_update();
                         return;
@@ -1557,6 +1532,58 @@ static void raspyMenu(Game* game) {
 
     // Actualizar la pantalla
     disp_update();
+}
+static bool movedLeft()
+{
+	jcoord_t coord = joy_get_coord();
+    if (coord.x < JOY_MAX_NEG/2){
+    	return true;
+    }
+    else{
+    	return false;
+    }
+}
+static bool movedRight()
+{
+	jcoord_t coord = joy_get_coord();
+    if (coord.x > JOY_MAX_POS/2){
+    	return true;
+    }
+    else{
+    	return false;
+    }
+}
+
+static bool movedDown()
+{
+	jcoord_t coord = joy_get_coord();
+	if (coord.y < JOY_MAX_NEG/2){
+		return true;
+	}
+	else{
+    	return false;
+    }
+}
+static bool movedUp()
+{
+	jcoord_t coord = joy_get_coord();
+	if (coord.y > JOY_MAX_POS / 2)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+static bool switch_pressed()
+{
+	jswitch_t state = joy_get_switch();
+	if (state == J_PRESS){
+		return true;
+	}
+    return false;
 }
 #endif
 
