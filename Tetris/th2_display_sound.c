@@ -22,11 +22,10 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_image.h>
+
 #else
-#include "../libs/joydisp/disdrv.h"  // Archivo de cabecera del display
-#include "../libs/joydisp/joydrv.h"   // Archivo de cabecera del joystick
-#include "../libs/audio/SDL2/src/audio.h"	// Archivo de cabecera del audio
-#include <SDL2/SDL.h>
+#include "joydisp/disdrv.h"  // Archivo de cabecera del display
+#include "joydisp/joydrv.h"   // Archivo de cabecera del joystick
 #endif
 
 /*******************************************************************************
@@ -86,7 +85,7 @@
 #define LEVEL "tetris.wav"
 
 char * raspySoundArray [10] = {0};
-char** raspySounds = &raspySoundArray;
+char* raspySounds[10] = &raspySoundArray;
 
 #endif
 
@@ -190,7 +189,6 @@ static void draw_board(Game* game);
 static void showNext(Game* game);
 static void showLevel(Game* game);
 static void joyUpdateValues();
-static void dispUpdateValues();
 static bool checkPasue();
 static bool checkResume();
 static bool checkRestart();
@@ -200,7 +198,6 @@ static void draw_tetromino(Game* game);
 static void clearDisp();
 static bool checkQuit();
 static void raspyShowScore(int score);
-static void destroyRaspy();
 static void raspyPlaySound(int soundIndex);
 static void raspyMenu(Game* game);
 
@@ -239,6 +236,7 @@ void * th2_display_sound(void* gamep)
 		{
 			if (event.timer.source == allegro->timer)
 			{
+				allegroUpdateHud(game);
 				game->redraw = true;
 			}
 			else if(event.timer.source == allegro->gametimer)
@@ -442,7 +440,7 @@ void * th2_display_sound(void* gamep)
         }
                 
     }
-    destroyRaspy();
+    endAudio();
     pthread_exit(NULL);
 #endif
 }
@@ -1516,17 +1514,6 @@ static void raspyShowScore(int score) {
         // Espera un tiempo (ajusta según sea necesario)
         usleep(50000); // 50 milisegundos
     }
-}
-
-
-static void dispUpdateValues()
-{
-    disp_update();
-}
-
-static void destroyRaspy()
-{
-    endAudio();
 }
 
 static void raspyMenu(Game* game) {

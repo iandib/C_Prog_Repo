@@ -105,6 +105,4 @@ typedef struct {
     int statistics[NUM_SHAPES]; // Statistics
 }Game;
 
-
-
 #endif // _COMMON_H_

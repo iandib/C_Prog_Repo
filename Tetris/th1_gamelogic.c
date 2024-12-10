@@ -7,6 +7,7 @@
 #include <stdbool.h>	
 #include <stdio.h>
 #include "common.h"
+#include "th1_gamelogic.h"
 #include "th2_display_sound.h"
 #include <time.h>
 #include <stdlib.h>
@@ -15,32 +16,9 @@
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-#define PC true
-
 #define BLOCK_TYPES 4
 #define LEVEL_STYLES 10
 
-#define NUM_SHAPES 7
-#define TETROMINO_W 4
-#define TETROMINO_H 4
-#define TETROMINO_R 4
-
-#define GRID_WIDTH 10
-
-#ifdef PC
-#define GRID_HEIGHT 20
-#else
-#define GRID_HEIGHT 16
-#endif
-
-#define FPS 60
-#define KEY_DELAY FPS/10
-
-#ifdef PC
-#define FIX_DELAY 10
-#else
-#define FIX_DELAY 5
-#endif
 
  /*******************************************************************************
   * ENUMERATIONS AND STRUCTURES AND TYPEDEFS
@@ -55,7 +33,6 @@ enum blockTypes
     STRIPES
 };
 
-
 static void copyShape(const int source[TETROMINO_H][TETROMINO_W], Game* game, bool active);
 static void rotate(Game* game);														//Checks if the tetromino can rotate, if it is possible, it is rotated.
 static bool canMoveSideways(Game* game, int xOffset);								//Checks if the current tetromino can move sideways
@@ -66,10 +43,6 @@ static void clearRows(Game* game);													//Clears full rows
 static void fixTetromino(Game* game);												//Fixes current tetromino in its current position (fills game grid with its shape)
 static void updateColorMap(Game* game, int row, int col);							//Updates of the fixed tetromino (makes it possible for the grid to have different colors)
 static void updateLevel(Game* game);												//Updates game level
-
-void initializeGame(Game* game);													//Initializes the game structure with the proper initial values
-void * th1_gamelogic(void* gamep);													//Thread 1 declaration
-void generateNewTetromino(Game* game);												//Generates a new tetromino on the grid
 
 extern int tetrominoShapes[NUM_SHAPES][TETROMINO_R][TETROMINO_H][TETROMINO_W];		//Array of tetromino shapes
 extern sem_t s;
@@ -277,6 +250,7 @@ static bool isGameOver(const Game* game)				// Checks if the game is over by sea
 	}
     return false;
 }
+
 static void updateScore(Game* game, int numClearedRows)			// Updates game score based on the number of rows cleared and the current level
 {
     switch (numClearedRows)

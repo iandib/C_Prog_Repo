@@ -9,9 +9,9 @@
 #define TH1_GAMELOGIC_H_
 #include "common.h"
 
-
-void initializeGame(Game* game);
 void * th1_gamelogic(void* gamep);
+void initializeGame(Game* game);
 void generateNewTetromino(Game* game);
+
 
 #endif /* TH1_GAMELOGIC_H_ */
