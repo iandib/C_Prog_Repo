@@ -199,7 +199,6 @@ static void initializeRaspy();
 static void draw_tetromino(Game* game);
 
 static void raspyShowScore(int score);
-static void raspyPlaySound(int soundIndex);
 static void raspyMenu(Game* game);
 
 extern int digitMatrices[10][8][6];
@@ -378,7 +377,7 @@ void * th2_display_sound(void* gamep)
 	destroyAllegro(&sprites);
 	pthread_exit(NULL);
 #else
-    int fall = 5;
+    double raspyFallTime = 5;
     initializeRaspy();
     while(!game->quit)
     {
@@ -410,12 +409,17 @@ void * th2_display_sound(void* gamep)
             {
                 game->frames += 10;
                 joy_update();
-                switch(fall)
+
+                if(raspyFallTime > 0)
                 {
-                case 0: game->activeTetromino.move_down++; fall = 5; break;
-                default: fall -= 1; break;
+                    raspyFallTime -= (1 + game->level /2 );
                 }
-                
+                else
+                {
+                    game->activeTetromino.move_down++;
+                    raspyFallTime = 5;
+                }
+
                 if(movedUp())
                 {
                     game->activeTetromino.rotate_++;
@@ -486,7 +490,7 @@ void playSoundIndex(int soundIndex)
 	#ifdef PC
 	al_play_sample(allegro->SFX[soundIndex], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 	#else
-	raspyPlaySound(soundIndex);
+	playSound(raspySounds[soundIndex], SDL_MIX_MAXVOLUME);
 	#endif
 }
 
@@ -1404,11 +1408,6 @@ static void initializeRaspy()
     disp_update();
     playMusic(GAME, SDL_MIX_MAXVOLUME / 2);
     srand(time(NULL));
-}
-
-static void raspyPlaySound(int soundIndex)
-{
-    playSound(raspySounds[soundIndex], SDL_MIX_MAXVOLUME);
 }
 
 static void raspyShowScore(int score) {
