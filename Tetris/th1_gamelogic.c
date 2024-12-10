@@ -147,6 +147,7 @@ void initializeGame(Game* game)											//Sets initial values
 	game->score = 0;
 	game->highScoreIndex = 0;
 	game->level = 0;
+	game->hasLevelChanged = false;
 	game->lines = 0;
 	game->levelCheckpoint = 1;
 	game->fixDelay = 0;
@@ -281,8 +282,10 @@ static void updateLevel(Game* game)								// Updates game level. This depends o
     {
         game->level++;
         game->levelCheckpoint += 10;
+		game->hasLevelChanged = true;
     }
 }
+
 void generateNewTetromino(Game* game)							// Generates a new random tetromino
 {
     int shapeIndex = rand() % NUM_SHAPES;						// Randomly selects a shape index for the new tetromino

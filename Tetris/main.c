@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #include <stdio.h>
 
+
 sem_t s;					//This global semaphore will stop the execution of th1_gamelogic as long as the user is not playing.
 
 

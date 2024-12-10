@@ -13,7 +13,6 @@
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
-#include <SDL2/SDL.h>
 
 #ifdef PC
 #include <allegro5/allegro5.h>
@@ -28,6 +27,7 @@
 #include "../libs/joydisp/disdrv.h"  // Archivo de cabecera del display
 #include "../libs/joydisp/joydrv.h"   // Archivo de cabecera del joystick
 #include "../libs/audio/SDL2/src/audio.h"   // Archivo de cabecera del joystick
+#include <SDL2/SDL.h>
 #endif
 
 /*******************************************************************************
@@ -143,8 +143,8 @@ typedef struct
     SPRITES sprites;
 
     // timer
-    ALLEGRO_TIMER* timer;
-    ALLEGRO_TIMER* gametimer;
+    ALLEGRO_TIMER* displayRedrawTimer;
+    ALLEGRO_TIMER* fallingTimer;
 
     // score
     long topScore;
@@ -234,16 +234,21 @@ void * th2_display_sound(void* gamep)
 	initializeAllegro(game, &sprites);
 	while(!game->quit)
 	{
+        if(game->hasLevelChanged)
+        {
+            al_set_timer_speed( allegro->fallingTimer, 1.0 / ((double)game->level*3/4) );
+            game->hasLevelChanged = false;
+        }
 		ALLEGRO_EVENT event;
 		al_wait_for_event(allegro->eventQueue, &event);
 		if(event.type == ALLEGRO_EVENT_TIMER)
 		{
-			if (event.timer.source == allegro->timer)
+			if (event.timer.source == allegro->displayRedrawTimer)
 			{
 				allegroUpdateHud(game);
 				game->redraw = true;
 			}
-			else if(event.timer.source == allegro->gametimer)
+			else if(event.timer.source == allegro->fallingTimer)
 			{
 				game->activeTetromino.move_down++;
 			}
@@ -265,7 +270,7 @@ void * th2_display_sound(void* gamep)
 						case ALLEGRO_KEY_SPACE:
 							game->menu = false;
 							game->gameOver = false;
-							al_start_timer(allegro->gametimer);
+							al_start_timer(allegro->fallingTimer);
 							sem_post(&s);
 							break;
 					}
@@ -277,7 +282,7 @@ void * th2_display_sound(void* gamep)
 						case ALLEGRO_KEY_DOWN:
 							sem_post(&s);
 							game->pause = false;
-							al_resume_timer(allegro->gametimer);
+							al_resume_timer(allegro->fallingTimer);
 							break;
 
 						case ALLEGRO_KEY_UP:
@@ -285,7 +290,7 @@ void * th2_display_sound(void* gamep)
 							initializeGame(game);
 							generateNewTetromino(game);
 							remove("saving.txt");
-							al_start_timer(allegro->gametimer);
+							al_start_timer(allegro->fallingTimer);
 							sem_post(&s);
 
 							break;
@@ -305,7 +310,7 @@ void * th2_display_sound(void* gamep)
 						case ALLEGRO_KEY_SPACE:
 							game->menu = true;
 							game->gameOver = false;
-							al_stop_timer(allegro->gametimer);
+							al_stop_timer(allegro->fallingTimer);
 							initializeGame(game);
 							generateNewTetromino(game);
 							break;
@@ -326,9 +331,10 @@ void * th2_display_sound(void* gamep)
 
 						case ALLEGRO_KEY_ESCAPE:
 							game->pause = true;
-							al_stop_timer(allegro->gametimer);
+							al_stop_timer(allegro->fallingTimer);
 							break;
 						case ALLEGRO_KEY_SPACE: game->activeTetromino.move_down += DISPLAY_H; break;
+
 
 						default: break;
 					}
@@ -372,7 +378,7 @@ void * th2_display_sound(void* gamep)
 	destroyAllegro(&sprites);
 	pthread_exit(NULL);
 #else
-	int fall = 5;
+    int fall = 5;
     initializeRaspy();
     while(!game->quit)
     {
@@ -404,15 +410,16 @@ void * th2_display_sound(void* gamep)
             {
                 game->frames += 10;
                 joy_update();
-		switch(fall)
+                switch(fall)
                 {
-                	case 0: game->activeTetromino.move_down++; fall = 5; break;
-               		default: fall -= 1; break;
+                case 0: game->activeTetromino.move_down++; fall = 5; break;
+                default: fall -= 1; break;
                 }
-                //ACA
+                
                 if(movedUp())
                 {
                     game->activeTetromino.rotate_++;
+                    SDL_Delay(100);
                 }
                 else if(movedDown())
                 {
@@ -468,8 +475,7 @@ void * th2_display_sound(void* gamep)
                     sem_post(&s);
                 }
             }
-        }
-                
+        }              
     }
     endAudio();
     pthread_exit(NULL);
@@ -1197,20 +1203,20 @@ static void allegroInitializeEventQueue(void)														// Initializes event 
     checkInitialization(allegro->eventQueue, "event queue");
 
     al_register_event_source(allegro->eventQueue, al_get_display_event_source(allegro->display));			    // Registers display and timer event as sources in the event queue
-    al_register_event_source(allegro->eventQueue, al_get_timer_event_source(allegro->timer));
-    al_register_event_source(allegro->eventQueue, al_get_timer_event_source(allegro->gametimer));
+    al_register_event_source(allegro->eventQueue, al_get_timer_event_source(allegro->displayRedrawTimer));
+    al_register_event_source(allegro->eventQueue, al_get_timer_event_source(allegro->fallingTimer));
     al_register_event_source(allegro->eventQueue, al_get_keyboard_event_source());
 }
 
 static void allegroInitializeTimer(void)													// Initializes the timers
 {
-    allegro->timer = al_create_timer(1.0 / FPS);											//Display redraw timer
-    checkInitialization(allegro->timer, "timer");
+    allegro->displayRedrawTimer = al_create_timer(1.0 / FPS  );					//Display redraw timer
+    checkInitialization(allegro->displayRedrawTimer, "displayRedrawTimer");
 
-    allegro->gametimer = al_create_timer(1.0 / 1);											//Falling timer
-    checkInitialization(allegro->gametimer, "gametimer");
+    allegro->fallingTimer = al_create_timer( 1.0 / 1.0); //CAPAZ ES MUY ALTO		//Falling timer
+    checkInitialization(allegro->fallingTimer, "fallingTimer");
     // Start timer
-    al_start_timer(allegro->timer);
+    al_start_timer(allegro->displayRedrawTimer);
 }
 
 static ALLEGRO_BITMAP* allegroGrabSprite(int x, int y, int w, int h, SPRITES* sprites)				// Grabs a sprite from the spritesheet
@@ -1226,8 +1232,8 @@ static void destroyAllegro(SPRITES* sprites)						//Destroys allegro elements
     al_destroy_event_queue(allegro->eventQueue);
 
     // Destroys timer
-    al_destroy_timer(allegro->timer);
-    al_destroy_timer(allegro->gametimer);
+    al_destroy_timer(allegro->displayRedrawTimer);
+    al_destroy_timer(allegro->fallingTimer);
 
     // Destroys sound
     allegroDestroySound();

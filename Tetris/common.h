@@ -5,6 +5,8 @@
   * INCLUDE HEADER FILES
   ******************************************************************************/
 
+#define PC 1
+
 #include <stdbool.h>
 #include <pthread.h>
 
@@ -91,7 +93,9 @@ typedef struct {
     long score; // Score								-SAVE
     int highScoreIndex; // Highscore index
     player_t leaderboard[11];	//Leaves an space at the end to store the current player data
-    int level; // Level									-SAVE
+    int level; // Level						-SAVE
+    bool hasLevelChanged; /*flag to check whether the level has been upgraded.
+                         It is declared here to avoid using global variables unnecesarely */
     bool gameOver; // Game over flag
     long frames; // Frame counter
     int lines; // Cleared lines counter
