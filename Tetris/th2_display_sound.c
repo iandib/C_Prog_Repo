@@ -247,6 +247,7 @@ void * th2_display_sound(void* gamep)
 #ifdef PC
 	bool pressed = false;
 	SPRITES sprites;
+	keys pressed_keys = {0, false, 0, false, 0, false, 0, false};
 	initializeAllegro(game, &sprites);
 	while(!game->quit)
 	{
@@ -366,7 +367,7 @@ void * th2_display_sound(void* gamep)
 
 						case ALLEGRO_KEY_ESCAPE:
 							game->pause = true;
-							al_stop_timer(allegro->fallingtimer);
+							al_stop_timer(allegro->fallingTimer);
 							break;
 						case ALLEGRO_KEY_SPACE: game->activeTetromino.move_down += DISPLAY_H; break;
 
@@ -849,7 +850,7 @@ static void allegroDrawMenu(SPRITES* sprites)
    	
 	menu_blink_delay--;
 	// Draws text
-	if(blink > 0)
+	if(menu_blink_delay > 0)
 	{
 		al_draw_text(
 			allegro->font,
@@ -866,7 +867,7 @@ static void allegroDrawMenu(SPRITES* sprites)
 			"TO START"
 		);
 	}
-	menu_blink_delay < MENU_BLINK_Off_DELAY  ? menu_blink_delay = MENU_BLINK_ON_DELAY : 1;
+	menu_blink_delay < MENU_BLINK_OFF_DELAY  ? menu_blink_delay = MENU_BLINK_ON_DELAY : 1;
 }
 static void allegroDrawGrid(const Game* game, SPRITES* sprites)
 {
@@ -1356,7 +1357,6 @@ static void checkInitialization(bool test, const char* description)					// Ensur
 }
 static void press_key_delay(keys* pressed_keys, Game* game)
 {
-	printf("\n%d\n", pressed_keys->delay_key_down);
 		if(pressed_keys->key_down_pressed)
 		{
 			if(pressed_keys->delay_key_down < 0)
