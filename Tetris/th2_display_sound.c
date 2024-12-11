@@ -73,6 +73,8 @@
 #define NEXT_OFFSET_X 160
 #define NEXT_OFFSET_Y 104
 
+#define MENU_BLINK_ON_DELAY 50
+#define MENU_BLINK_OFF_DELAY -20
 // --- score ---
 
 #define MAX_SCORE 999999
@@ -785,24 +787,31 @@ static void allegroDrawHud(Game* game, SPRITES* sprites)
 }
 static void allegroDrawMenu(SPRITES* sprites)
 {
-    // Draws framing
-    al_draw_bitmap(sprites->menu, 0, 0, 0); // @suppress("Field cannot be resolved")
-
-    // Draws text
-    al_draw_text(
-        allegro->font,
-        al_map_rgb_f(1, 1, 1),
-        42, 146,
-        0,
-        "PRESS SPACE"
-    );
-    al_draw_text(
-        allegro->font,
-        al_map_rgb_f(1, 1, 1),
-        54, 158,
-        0,
-        "TO START"
-    );
+    	// Draws framing
+    	al_draw_bitmap(sprites->menu, 0, 0, 0); 
+	
+	static int menu_blink_delay = MENU_BLINK_ON_DELAY;
+   	
+	menu_blink_delay--;
+	// Draws text
+	if(blink > 0)
+	{
+		al_draw_text(
+			allegro->font,
+			al_map_rgb_f(1, 1, 1),
+			42, 146,
+			0,
+			"PRESS SPACE"
+		);
+		al_draw_text(
+			allegro->font,
+			al_map_rgb_f(1, 1, 1),
+			54, 158,
+			0,
+			"TO START"
+		);
+	}
+	menu_blink_delay < MENU_BLINK_Off_DELAY  ? menu_blink_delay = MENU_BLINK_ON_DELAY : 1;
 }
 static void allegroDrawGrid(const Game* game, SPRITES* sprites)
 {
