@@ -16,7 +16,7 @@ sem_t s;					//This global semaphore will stop the execution of th1_gamelogic as
 
 int main(void)
 {
-	if (sem_init(&s, 1, 1) != 0)					//The semaphore is initialized as binary, shared between threads
+	if (sem_init(&s, 0, 0) != 0)					//The semaphore is initialized with the value of 0, shared between threads
 	{
 	// Error: initialization failed
 		return 1;
