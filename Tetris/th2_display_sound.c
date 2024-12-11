@@ -154,6 +154,20 @@ typedef struct
 
 } ALLEGRO_ELEMENTS;
 
+typedef struct keys
+{
+	short int delay_key_down;
+	bool key_down_pressed;
+
+	short int delay_key_left;
+	bool key_left_pressed;
+
+	short int delay_key_up;
+	bool key_up_pressed;
+
+	short int delay_key_right;
+	bool key_right_pressed;
+} keys;
 
 
 static void allegroDrawHighScore(long score, int scoreIndex);
@@ -187,6 +201,7 @@ static void allegroDestroySprites(SPRITES* sprites);
 
 static void checkInitialization(bool test, const char* description);
 static void save_game(Game* game);
+static void press_key_delay(keys* pressed_keys, Game* game);
 
 static ALLEGRO_ELEMENTS allegroElements = { 0 };
 static ALLEGRO_ELEMENTS* allegro = &allegroElements;
@@ -271,6 +286,10 @@ void * th2_display_sound(void* gamep)
 						case ALLEGRO_KEY_SPACE:
 							game->menu = false;
 							game->gameOver = false;
+							pressed_keys.key_down_pressed = false;
+							pressed_keys.key_left_pressed = false;
+							pressed_keys.key_right_pressed = false;
+							pressed_keys.key_up_pressed = false;
 							al_start_timer(allegro->fallingTimer);
 							sem_post(&s);
 							break;
@@ -319,28 +338,64 @@ void * th2_display_sound(void* gamep)
 				}
 				else
 				{
-
 					switch(event.keyboard.keycode)
 					{
-						case ALLEGRO_KEY_DOWN: game->activeTetromino.move_down++; break;
+						case ALLEGRO_KEY_DOWN:
+							game->activeTetromino.move_down++;
+							pressed_keys.delay_key_down = KEY_DELAY;
+							pressed_keys.key_down_pressed = true;
+						break;
 
-						case ALLEGRO_KEY_UP: game->activeTetromino.rotate_++; break;
+						case ALLEGRO_KEY_UP:
+							game->activeTetromino.rotate_++;
+							pressed_keys.delay_key_up = KEY_DELAY;
+							pressed_keys.key_up_pressed = true;
+						break;
 
-						case ALLEGRO_KEY_LEFT: game->activeTetromino.move_left++; break;
+						case ALLEGRO_KEY_LEFT:
+							game->activeTetromino.move_left++;
+							pressed_keys.delay_key_left = KEY_DELAY;
+							pressed_keys.key_left_pressed = true;
+							break;
 
-						case ALLEGRO_KEY_RIGHT: game->activeTetromino.move_right++; break;
+						case ALLEGRO_KEY_RIGHT:
+							game->activeTetromino.move_right++;
+							pressed_keys.delay_key_right = KEY_DELAY;
+							pressed_keys.key_right_pressed = true;
+							break;
 
 						case ALLEGRO_KEY_ESCAPE:
 							game->pause = true;
-							al_stop_timer(allegro->fallingTimer);
+							al_stop_timer(allegro->fallingtimer);
 							break;
 						case ALLEGRO_KEY_SPACE: game->activeTetromino.move_down += DISPLAY_H; break;
-
 
 						default: break;
 					}
 				}
 			}
+		}
+		else if(event.type == ALLEGRO_EVENT_KEY_UP)
+		{
+			if(!game->menu && !game->pause && !game->gameOver)
+			{
+				switch(event.keyboard.keycode)
+				{
+					case ALLEGRO_KEY_DOWN: pressed_keys.key_down_pressed = false; break;
+
+					case ALLEGRO_KEY_UP: pressed_keys.key_up_pressed = false; break;
+
+					case ALLEGRO_KEY_LEFT: pressed_keys.key_left_pressed = false; break;
+
+					case ALLEGRO_KEY_RIGHT: pressed_keys.key_right_pressed = false; break;
+
+					default: break;
+				}
+			}
+		}
+		if(!game->menu && !game->gameOver && !game->pause)
+		{
+			press_key_delay(&pressed_keys, game);
 		}
 		if (game->redraw && al_is_event_queue_empty(allegro->eventQueue))
 		{
@@ -1299,7 +1354,58 @@ static void checkInitialization(bool test, const char* description)					// Ensur
     printf("couldn't initialize %s\n", description);
     exit(1);
 }
-
+static void press_key_delay(keys* pressed_keys, Game* game)
+{
+	printf("\n%d\n", pressed_keys->delay_key_down);
+		if(pressed_keys->key_down_pressed)
+		{
+			if(pressed_keys->delay_key_down < 0)
+			{
+				pressed_keys->delay_key_down++;
+			}
+			else
+			{
+				game->activeTetromino.move_down++;
+				pressed_keys->delay_key_down = KEY_DELAY;
+			}
+		}
+		else if(pressed_keys->key_up_pressed)
+		{
+			if(pressed_keys->delay_key_up < 0)
+			{
+				pressed_keys->delay_key_up++;
+			}
+			else
+			{
+				game->activeTetromino.rotate_++;
+				pressed_keys->delay_key_up = KEY_DELAY;
+			}
+		}
+		else if(pressed_keys->key_left_pressed)
+		{
+			if(pressed_keys->delay_key_left < 0)
+			{
+				pressed_keys->delay_key_left++;
+			}
+			else
+			{
+				game->activeTetromino.move_left++;
+				pressed_keys->delay_key_left = KEY_DELAY;
+			}
+		}
+		if(pressed_keys->key_right_pressed)
+		{
+			if(pressed_keys->delay_key_right < 0)
+			{
+				pressed_keys->delay_key_right++;
+			}
+			else
+			{
+				game->activeTetromino.move_right++;
+				pressed_keys->delay_key_right = KEY_DELAY;
+			}
+		}
+}
 #else
 
 static void draw_board(Game* game) {
