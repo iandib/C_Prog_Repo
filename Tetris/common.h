@@ -28,7 +28,7 @@
 #endif
 
 #define FPS 60
-#define KEY_DELAY -70
+#define KEY_DELAY -10
 
 #ifdef PC
 #define FIX_DELAY 10
