@@ -1,8 +1,8 @@
 /*
- * sound.c
+ * th2_display_sound.c
  *
  *  Created on: Nov 25, 2024
- *      Author: juani
+ *      Author: Luchelli, Dib, Moschini, Caorsi
  */
 #include "common.h"
 #include <stdio.h>
