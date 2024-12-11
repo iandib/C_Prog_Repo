@@ -303,13 +303,13 @@ void generateNewTetromino(Game* game)							// Generates a new random tetromino
         }
         copyShape(game->nextTetromino.shape, game, true);						//Copies the next tetromino's values to the active
         game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
-		game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
-		game->activeTetromino.rotation = game->nextTetromino.rotation;
-		game->activeTetromino.move_down = game->nextTetromino.move_down;
-		game->activeTetromino.move_up = game->nextTetromino.move_up;
-		game->activeTetromino.move_left = game->nextTetromino.move_left;
-		game->activeTetromino.move_right = game->nextTetromino.move_right;
-		game->activeTetromino.rotate_ = game->nextTetromino.rotate_;
+	game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
+	game->activeTetromino.rotation = game->nextTetromino.rotation;
+	game->activeTetromino.move_down = game->nextTetromino.move_down;
+	game->activeTetromino.move_up = game->nextTetromino.move_up;
+	game->activeTetromino.move_left = game->nextTetromino.move_left;
+	game->activeTetromino.move_right = game->nextTetromino.move_right;
+	game->activeTetromino.rotate_ = game->nextTetromino.rotate_;
         game->statistics[game->nextTetromino.shapeIndex]++;
 
         game->nextTetromino.x = GRID_WIDTH / 2 - 1;
@@ -341,7 +341,9 @@ void generateNewTetromino(Game* game)							// Generates a new random tetromino
     		game->statistics[i] = 0;
     	}
         copyShape(tetrominoShapes[shapeIndex][0], game, true);					//Copies another tetromino shape randomly chosen to the active tetromino shape matrix
-        game->activeTetromino.shapeIndex = shapeIndex;						// Updates the new next tetromino with the new shape and position
+        game->activeTetromino.move_down = 0;							//Makes sure that the active tetromino does not go down nor rotates before the game starts 
+	game->activeTetromino.rotate_ = 0;
+	game->activeTetromino.shapeIndex = shapeIndex;						// Updates the new next tetromino with the new shape and position
         game->statistics[shapeIndex]++;								// Updates the shape statistics, according to the tetromino that was generated
 
     }
