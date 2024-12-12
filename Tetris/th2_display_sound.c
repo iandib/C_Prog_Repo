@@ -345,6 +345,7 @@ void * th2_display_sound(void* gamep)
 							game->activeTetromino.move_down++;
 							pressed_keys.delay_key_down = KEY_DELAY;
 							pressed_keys.key_down_pressed = true;
+							al_stop_timer(allegro->fallingTimer);
 						break;
 
 						case ALLEGRO_KEY_UP:
@@ -382,7 +383,7 @@ void * th2_display_sound(void* gamep)
 			{
 				switch(event.keyboard.keycode)
 				{
-					case ALLEGRO_KEY_DOWN: pressed_keys.key_down_pressed = false; break;
+					case ALLEGRO_KEY_DOWN: pressed_keys.key_down_pressed = false; al_resume_timer(allegro->fallingTimer); break;
 
 					case ALLEGRO_KEY_UP: pressed_keys.key_up_pressed = false; break;
 
@@ -1366,7 +1367,7 @@ static void press_key_delay(keys* pressed_keys, Game* game)
 				pressed_keys->delay_key_down = KEY_DELAY;
 			}
 		}
-		else if(pressed_keys->key_up_pressed)
+		if(pressed_keys->key_up_pressed)
 		{
 			if(pressed_keys->delay_key_up < 0)
 			{
@@ -1378,7 +1379,7 @@ static void press_key_delay(keys* pressed_keys, Game* game)
 				pressed_keys->delay_key_up = KEY_DELAY;
 			}
 		}
-		else if(pressed_keys->key_left_pressed)
+		if(pressed_keys->key_left_pressed)
 		{
 			if(pressed_keys->delay_key_left < 0)
 			{
