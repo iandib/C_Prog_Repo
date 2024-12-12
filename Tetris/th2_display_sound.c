@@ -435,18 +435,18 @@ void * th2_display_sound(void* gamep)
 	destroyAllegro(&sprites);
 	pthread_exit(NULL);
 #else
-    double raspyFallTime = 5;
+    double raspyFallTime = 10;
     initializeRaspy();
     while(!game->quit)
     {
         while (game->menu && !game->quit)
         {
             pauseAudio();
-            joy_update();
             raspyMenu(game);
             if (movedRight())
             {
                 game->menu = false;
+                initializeGame(game);
                 disp_clear();
                 disp_update();
                 sem_post(&s);
@@ -466,7 +466,6 @@ void * th2_display_sound(void* gamep)
             while (!game->gameOver && !game->menu && !game->quit)
             {
                 game->frames += 10;
-                joy_update();
 
                 if(raspyFallTime > 0)
                 {
@@ -503,34 +502,32 @@ void * th2_display_sound(void* gamep)
                 game->pause = switch_pressed();
                 while (game->pause)
                 {
-                    joy_update();
                     if (movedLeft())
                     {
                         unpauseAudio();
                         sem_post(&s);
-                        break;
+                        game->pause = false;
                     }
                     else if (movedRight())
                     {
                         unpauseAudio();
                         initializeGame(game);
-                        game->menu = false;
+                        generateNewTetromino(game);
                         sem_post(&s);
-                        break;
+                        game->pause = false;
                     }
-                    else if (switch_pressed())
+                    else if (movedUp())
                     {
                         pauseAudio();
-                        initializeGame(game);
+                        game->menu = true;
                         disp_clear();
-                        break;
+                        game->pause = false;
                     }
                 }
                 if (game->gameOver)
                 {
                     while (!movedRight()) 
                     {
-                        joy_update();
                         raspyShowScore(game->score);
                     }
                     initializeGame(game);
@@ -1494,7 +1491,7 @@ static void showLevel(Game* game)
 
 static bool checkPasue()
 {
-    jcoord_t coord = joy_get_coord();
+    joyinfo_t coord = joy_read();
     if (coord.y > JOY_MAX_POS / 2)
     {
         return true;
@@ -1544,7 +1541,6 @@ static void raspyShowScore(int score) {
                             disp_write(point, D_ON);
                         }
                     }
-                    joy_update();
                     if (movedRight()) {
                         unpauseAudio();
                         disp_clear();
@@ -1597,7 +1593,6 @@ static void raspyShowScore(int score) {
                             disp_write(point, D_ON);
                         }
                     }
-                    joy_update();
                     if (movedRight()) {
                         unpauseAudio();
                         disp_clear();
@@ -1660,7 +1655,7 @@ static void raspyMenu(Game* game) {
 }
 static bool movedLeft()
 {
-	jcoord_t coord = joy_get_coord();
+	joyinfo_t coord = joy_read();
     if (coord.x < JOY_MAX_NEG/2){
     	return true;
     }
@@ -1670,7 +1665,7 @@ static bool movedLeft()
 }
 static bool movedRight()
 {
-	jcoord_t coord = joy_get_coord();
+	joyinfo_t coord = joy_read();
     if (coord.x > JOY_MAX_POS/2){
     	return true;
     }
@@ -1681,7 +1676,7 @@ static bool movedRight()
 
 static bool movedDown()
 {
-	jcoord_t coord = joy_get_coord();
+	joyinfo_t coord = joy_read();
 	if (coord.y < JOY_MAX_NEG/2){
 		return true;
 	}
@@ -1691,7 +1686,7 @@ static bool movedDown()
 }
 static bool movedUp()
 {
-	jcoord_t coord = joy_get_coord();
+	joyinfo_t coord = joy_read();
 	if (coord.y > JOY_MAX_POS / 2)
 	{
 		return true;
@@ -1704,8 +1699,8 @@ static bool movedUp()
 
 static bool switch_pressed()
 {
-	jswitch_t state = joy_get_switch();
-	if (state == J_PRESS){
+	joyinfo_t coord = joy_read();
+	if (coord.sw == J_PRESS){
 		return true;
 	}
     return false;
