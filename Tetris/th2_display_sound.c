@@ -458,7 +458,7 @@ void * th2_display_sound(void* gamep)
     	coord = joy_read();
     	if(game->menu)
     	{
-		disp_clear();
+		
 			pauseAudio();
 			switch(game->menu)
 			{
@@ -1667,7 +1667,8 @@ static void raspyShowScore(int score, joyinfo_t* coord) {
 }
 
 static void raspyMenu(int menuScreen[16][16]) {
-    dcoord_t coord;
+   disp_clear();
+dcoord_t coord;
     for (int i = 0; i < 16; ++i) {
         for (int j = 0; j < 16; ++j) {
             coord.x = j;
