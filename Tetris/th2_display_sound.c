@@ -515,6 +515,10 @@ void * th2_display_sound(void* gamep)
 						sem_post(&s);
 				   	
 				}
+				else if(game->menu == 1)
+				{
+					game->quit = true;
+				}
 			}
 			if(game->menu == 2)
 			{
