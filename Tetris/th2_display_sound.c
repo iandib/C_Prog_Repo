@@ -458,23 +458,24 @@ void * th2_display_sound(void* gamep)
     	coord = joy_read();
     	if(game->menu)
     	{
+		disp_clear();
 			pauseAudio();
 			switch(game->menu)
 			{
 				case 2:
-					disp_clear();
+					
 					raspyMenu(menuViews[0]);
 					break;
 				case 3:
-					disp_clear();
+					
 					raspyMenu(menuViews[1]);
 					break;
 				case 4:
-					disp_clear();
+					
 					raspyMenu(menuViews[2]);
 					break;
 				case 1:
-					disp_clear();
+					
 					raspyMenu(menuViews[3]);
 					break;
 				default: break;
