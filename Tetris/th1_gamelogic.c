@@ -2,7 +2,7 @@
  * th1_gamelogic.c
  *
  *  Created on: Nov 25, 2024
- *      Author: juani
+ *      Author: Luchelli, Dib, Moschini, Caorsi
  */
 #include <stdbool.h>	
 #include <stdio.h>
@@ -115,11 +115,12 @@ void * th1_gamelogic(void* gamep)
 			{
 				rotate(game);											//Depending on the position of the tetromino, this funtion will check if it is possible to rotate or not the tetromino, if it is, the tetromino will be rotated
 			}
-		    if (game->lines >= game->levelCheckpoint)					//Depending on the cleared rows so far, the game level is incremented as well as the amount of cleared rows necessary for the next level
+		   /* if (game->lines >= game->levelCheckpoint)					//Depending on the cleared rows so far, the game level is incremented as well as the amount of cleared rows necessary for the next level
 		    {
 		        game->level++;
 		        game->levelCheckpoint += 10;
-		    }
+		    }    No tiene sentido que se actualice aca, deberia actualizarse solo cuando se "limpia" una linea 
+			*/
 		    if (isGameOver(game))										//If game over is reached, the flag that incates so is activated
 		    {
 		        game->gameOver = true;
@@ -129,10 +130,6 @@ void * th1_gamelogic(void* gamep)
 		}
 		else															//As soon as we run the program, this conditional is reached. Generating a new tetromino will be necessary, unless we have an old game loaded. If we do, we previously said that the program would go directly to the pause screen
 		{
-			if(game->menu || game->gameOver)
-			{
-				//generateNewTetromino(game);
-			}
 			sem_wait(&s);												//The program waits here for the user to start the game
 			if(game->restart)
 			{
@@ -147,7 +144,7 @@ void * th1_gamelogic(void* gamep)
 
 void initializeGame(Game* game)											//Sets initial values
 {
-	game->menu = 2;
+	game->menu = PLAY;
 	game->gameOver = false;
 	game->score = 0;
 	game->highScoreIndex = 0;
@@ -488,7 +485,3 @@ static void updateColorMap(Game* game, int row, int col)						//Makes that the r
 	}
 	#endif
 }
-
-
-
-
