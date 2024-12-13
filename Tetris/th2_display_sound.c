@@ -458,7 +458,7 @@ void * th2_display_sound(void* gamep)
     	coord = joy_read();
     	if(game->menu)
     	{
-		
+			disp_clear();
 			pauseAudio();
 			switch(game->menu)
 			{
@@ -489,6 +489,7 @@ void * th2_display_sound(void* gamep)
 					delay_joy.delay_joy_right = 80;
 			   }
 			}
+		
 			if(movedLeft(&coord) && !delay_joy.delay_joy_left)
 			{
 			   if(game->menu > 1)
@@ -499,26 +500,28 @@ void * th2_display_sound(void* gamep)
 			}
 			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
-			if(game->menu == 4)
-			{
-				if(switch_pressed(&coord))
+				if(game->menu == 4)
 				{
-					game->menu = false;
-					game->gameOver = false;
-					delay_joy.delay_joy_switch = 80;
-					disp_clear();
-					sem_post(&s);
-			   	}
+					if(switch_pressed(&coord))
+					{
+						disp_clear();
+						game->menu = false;
+						game->gameOver = false;
+						delay_joy.delay_joy_switch = 80;
+						
+						sem_post(&s);
+				   	}
+				}
 			}
 			if(game->menu == 2)
 			{
-				if(switch_pressed(&coord))
+				/*if(switch_pressed(&coord))
 				{
 					game->menu = false;
 					game->gameOver = false;
 					delay_joy.delay_joy_switch = 80;
 					sem_post(&s);
-				}
+				}*/
 			}
     	}//
     	else if(game->pause)
@@ -1683,7 +1686,6 @@ static void raspyShowScore(int score, joyinfo_t* coord) {
 }
 
 static void raspyMenu(int menuScreen[16][16]) {
-   disp_clear();
 dcoord_t coord;
     for (int i = 0; i < 16; ++i) {
         for (int j = 0; j < 16; ++j) {
