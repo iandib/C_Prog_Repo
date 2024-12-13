@@ -483,7 +483,7 @@ void * th2_display_sound(void* gamep)
 					delay_joy.delay_joy_right = 100;
 			   }
 			}
-			if(movedLeft(&coord) && && !delay_joy.delay_joy_left)
+			if(movedLeft(&coord) && !delay_joy.delay_joy_left)
 			{
 			   if(game->menu > 1)
 			   {
