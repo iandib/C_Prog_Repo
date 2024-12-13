@@ -216,10 +216,11 @@ static void initializeRaspy();
 static void draw_tetromino(Game* game);
 
 static void raspyShowScore(int score, joyinfo_t* coord);
-static void raspyMenu(Game* game);
+static void raspyMenu(int[16][16]);
 
 extern int digitMatrices[10][8][6];
 extern int menuMatrices[4][8][8];
+extern int menuViews[4][16][16];
 
 static bool movedLeft(joyinfo_t* coord);
 static bool movedRight(joyinfo_t* coord);
@@ -441,29 +442,57 @@ void * th2_display_sound(void* gamep)
 	pthread_exit(NULL);
 #else
     double raspyFallTime = 5;
+    joyinfo_t coord;
     initializeRaspy();
     while(!game->quit)
     {
         while (game->menu && !game->quit)
         {
-        	joyinfo_t coord = joy_read();
+            coord = joy_read();
             pauseAudio();
-            raspyMenu(game);
+            switch(game->menu)
+            {
+                case 2:
+                    raspyMenu(menuViews[0]);
+                    break;
+                case 3:
+                    raspyMenu(menuViews[1]);
+                    break;
+                case 4:
+                    raspyMenu(menuViews[2]);
+                    break;
+                case 1:
+                    raspyMenu(menuViews[3]);
+                    break;
+                default: break;
+            }
             if (movedRight(&coord))
             {
+                /*
                 game->menu = false;
 							game->gameOver = false;
                 disp_clear();
                 disp_update();
                 sem_post(&s);
+                */
+               if(game->menu < 5)
+               {
+                    game->menu++;
+               }
             }
             else if (movedLeft(&coord))
             {
+                /*
                 unpauseAudio();
                 game->quit = true;
                 game->menu = false;
                 disp_clear();
                 disp_update();
+                */
+               if(game->menu > 1)
+               {
+                    game->menu--;
+               }
             }
         }
         while (!game->menu && !game->quit)
@@ -1611,45 +1640,15 @@ static void raspyShowScore(int score, joyinfo_t* coord) {
     }
 }
 
-static void raspyMenu(Game* game) {
+static void raspyMenu(int menuScreen[16][16]) {
     dcoord_t coord;
-
-    // P en el 8x8 superior izquierdo
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 0; j < 8; ++j) {
+    for (int i = 0; i < 16; ++i) {
+        for (int j = 0; j < 16; ++j) {
             coord.x = j;
             coord.y = i;
-            disp_write(coord, menuMatrices[0][i][j]);
+            disp_write(coord, menuScreen[i][j]);
         }
     }
-
-    // Flecha hacia arriba en el 8x8 superior derecho
-    for (int i = 0; i < 8; ++i) {
-        for (int j = 8; j < 16; ++j) {
-            coord.x = j;
-            coord.y = i;
-            disp_write(coord, menuMatrices[2][i][j - 8]);
-        }
-    }
-
-    // Q en el 8x8 inferior izquierdo
-    for (int i = 8; i < 16; ++i) {
-        for (int j = 0; j < 8; ++j) {
-            coord.x = j;
-            coord.y = i;
-            disp_write(coord, menuMatrices[1][i - 8][j]);
-        }
-    }
-
-    // Flecha hacia abajo en el 8x8 inferior derecho
-    for (int i = 8; i < 16; ++i) {
-        for (int j = 8; j < 16; ++j) {
-            coord.x = j;
-            coord.y = i;
-            disp_write(coord, menuMatrices[3][i - 8][j - 8]);
-        }
-    }
-
     // Actualizar la pantalla
     disp_update();
 }

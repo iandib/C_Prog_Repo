@@ -98,7 +98,7 @@ typedef struct {
     bool pause; // Pause flag
     bool redraw; // Redraw flag
     bool waitingForExit; // Waiting for exit flag	//SACO
-    bool menu; // Menu flag
+    int menu; // Menu flag
     int statistics[NUM_SHAPES]; // Statistics
     bool restart;	//True whenever we need to restart a game
 }Game;

@@ -61,7 +61,7 @@ void * th1_gamelogic(void* gamep)
 	}
     else
 	{
-    	game->menu = true;
+    	game->menu = 2;
 	}
 	while(!game->quit)
 	{
@@ -147,7 +147,7 @@ void * th1_gamelogic(void* gamep)
 
 void initializeGame(Game* game)											//Sets initial values
 {
-	game->menu = true;
+	game->menu = 2;
 	game->gameOver = false;
 	game->score = 0;
 	game->highScoreIndex = 0;
