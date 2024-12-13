@@ -446,56 +446,114 @@ void * th2_display_sound(void* gamep)
     initializeRaspy();
     while(!game->quit)
     {
-        while (game->menu && !game->quit)
+    	coord = joy_read();
+    	if(game->menu)
+    	{
+			pauseAudio();
+			switch(game->menu)
+			{
+				case 2:
+					raspyMenu(menuViews[0]);
+					break;
+				case 3:
+					raspyMenu(menuViews[1]);
+					break;
+				case 4:
+					raspyMenu(menuViews[2]);
+					break;
+				case 1:
+					raspyMenu(menuViews[3]);
+					break;
+				default: break;
+			}
+			if (movedRight(&coord))
+			{
+			   if(game->menu < 5)
+			   {
+					game->menu++;
+					SDL_Delay(5000);
+			   }
+			}
+			else if (movedLeft(&coord))
+			{
+			   if(game->menu > 1)
+			   {
+					game->menu--;
+					SDL_Delay(5000);
+			   }
+			}
+    	}
+    	else if(game->pause)
+    	{
+			if (movedLeft(&coord))
+			{
+				unpauseAudio();
+				sem_post(&s);
+				game->pause = false;
+			}
+			else if (movedRight(&coord))
+			{
+				unpauseAudio();
+				game->pause = false;
+				game->restart = true;
+				sem_post(&s);
+			}
+			else if (movedUp(&coord))
+			{
+				pauseAudio();
+				game->menu = true;
+				disp_clear();
+				game->pause = false;
+			}
+    	}
+    	else if(game->gameOver)
         {
-            coord = joy_read();
-            pauseAudio();
-            switch(game->menu)
+            while (!movedRight(&coord))
             {
-                case 2:
-                    raspyMenu(menuViews[0]);
-                    break;
-                case 3:
-                    raspyMenu(menuViews[1]);
-                    break;
-                case 4:
-                    raspyMenu(menuViews[2]);
-                    break;
-                case 1:
-                    raspyMenu(menuViews[3]);
-                    break;
-                default: break;
+            	coord = joy_read();
+                raspyShowScore(game->score, &coord);
             }
-            if (movedRight(&coord))
-            {
-                /*
-                game->menu = false;
-							game->gameOver = false;
-                disp_clear();
-                disp_update();
-                sem_post(&s);
-                */
-               if(game->menu < 5)
-               {
-                    game->menu++;
-               }
-            }
-            else if (movedLeft(&coord))
-            {
-                /*
-                unpauseAudio();
-                game->quit = true;
-                game->menu = false;
-                disp_clear();
-                disp_update();
-                */
-               if(game->menu > 1)
-               {
-                    game->menu--;
-               }
-            }
+            initializeGame(game);
+            sem_post(&s);
         }
-        while (!game->menu && !game->quit)
+    	else
+    	{
+    		if(raspyFallTime > 0)
+			{
+				raspyFallTime -= (1 + game->level /2 );
+			}
+			else
+			{
+				game->activeTetromino.move_down++;
+				raspyFallTime = 5;
+			}
+
+			if(movedUp(&coord))
+			{
+				game->activeTetromino.rotate_++;
+				SDL_Delay(100);
+			}
+			else if(movedDown(&coord))
+			{
+				game->activeTetromino.move_down++;
+			}
+			else if(movedLeft(&coord))
+			{
+				game->activeTetromino.move_left++;
+			}
+			else if(movedRight(&coord))
+			{
+				game->activeTetromino.move_right++;
+			}
+
+			game->pause = switch_pressed(&coord);
+
+			draw_board(game);
+			showLevel(game);
+			showNext(game);
+			draw_tetromino(game);
+    	}//
+       /* while (!game->menu && !game->quit)
         {
             game->gameOver = false;
             while (!game->gameOver && !game->menu && !game->quit)
@@ -503,76 +561,14 @@ void * th2_display_sound(void* gamep)
             	joyinfo_t coord = joy_read();
                 //game->frames += 10;
 
-                if(raspyFallTime > 0)
-                {
-                    raspyFallTime -= (1 + game->level /2 );
-                }
-                else
-                {
-                    game->activeTetromino.move_down++;
-                    raspyFallTime = 5;
-                }
 
-                if(movedUp(&coord))
-                {
-                    game->activeTetromino.rotate_++;
-                    SDL_Delay(100);
-                }
-                else if(movedDown(&coord))
-                {
-                    game->activeTetromino.move_down++;
-                }
-                else if(movedLeft(&coord))
-                {
-                    game->activeTetromino.move_left++;
-                }
-                else if(movedRight(&coord))
-                {
-                    game->activeTetromino.move_right++;
-                }
-                draw_board(game);
-                showLevel(game);
-                showNext(game);
-                draw_tetromino(game);
-
-                game->pause = switch_pressed(&coord);
                 while (game->pause)
                 {
-                	joyinfo_t coord = joy_read();
-                    if (movedLeft(&coord))
-                    {
-                        unpauseAudio();
-                        sem_post(&s);
-                        game->pause = false;
-                    }
-                    else if (movedRight(&coord))
-                    {
-                        unpauseAudio();
-                        initializeGame(game);
-                        generateNewTetromino(game);
-                        sem_post(&s);
-                        game->pause = false;
-                    }
-                    else if (movedUp(&coord))
-                    {
-                        pauseAudio();
-                        game->menu = true;
-                        disp_clear();
-                        game->pause = false;
-                    }
+
                 }
-                if (game->gameOver)
-                {
-                    while (!movedRight(&coord))
-                    {
-                    	joyinfo_t coord = joy_read();
-                        raspyShowScore(game->score, &coord);
-                    }
-                    initializeGame(game);
-                    sem_post(&s);
-                }
+
             }
-        }              
+        } */
     }
     endAudio();
     pthread_exit(NULL);
