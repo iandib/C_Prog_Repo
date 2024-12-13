@@ -34,22 +34,14 @@
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-
-
-/*******************************************************************************
- * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
- ******************************************************************************/
-
 // --- sprites ---
 #define BLOCK_TYPES 4
 #define LEVEL_STYLES 10
 
 // --- sound ---
-
 #define MAX_SFX 32
 
 // --- display ---
-
 #define BUFFER_W 256
 #define BUFFER_H 224
 
@@ -58,12 +50,10 @@
 #define DISPLAY_H (BUFFER_H * DISPLAY_SCALE)
 
 // --- sprites ---
-
 #define BLOCK_W 8
 #define BLOCK_H 8
 
 // --- hud ---
-
 #define HUD_OFFSET_X 32
 #define MENU_OFFSET_x 289
 
@@ -75,8 +65,8 @@
 
 #define MENU_BLINK_ON_DELAY 50
 #define MENU_BLINK_OFF_DELAY -20
-// --- score ---
 
+// --- score ---
 #define MAX_SCORE 999999
 
 #ifndef PC
@@ -88,23 +78,17 @@
 #define ROT "rotate.wav"
 #define LEVEL "tetris.wav"
 
+#define INITIAL_FALL_TIME 40
+#define JOYSTICK_DELAY 50
+
 char * raspySoundArray [10] = {0};
 char** raspySounds = &raspySoundArray;
-
 
 #endif
 
 /*******************************************************************************
- * ENUMERATIONS AND STRUCTURES AND TYPEDEFS
+ * TYPEDEFs, ENUMs AND PRIVATE PROTOTYPES
  ******************************************************************************/
-
-enum blockTypes
-{
-    WHITE = 0,
-    LIGHT,
-    DARK,
-    STRIPES
-};
 
 #ifdef PC
 typedef struct
@@ -169,6 +153,14 @@ typedef struct keys
 	bool key_right_pressed;
 } keys;
 
+enum blockTypes
+{
+    WHITE = 0,
+    LIGHT,
+    DARK,
+    STRIPES
+};
+
 
 static void allegroDrawHighScore(long score, int scoreIndex);
 static void allegroDrawPause(void);
@@ -211,7 +203,6 @@ static ALLEGRO_ELEMENTS* allegro = &allegroElements;
 static void draw_board(Game* game);
 static void showNext(Game* game);
 static void showLevel(Game* game);
-//static bool checkPause();
 static void initializeRaspy();
 static void draw_tetromino(Game* game);
 
@@ -449,8 +440,8 @@ void * th2_display_sound(void* gamep)
 	destroyAllegro(&sprites);
 	pthread_exit(NULL);
 #else
-    double raspyFallTime = 5;
-    delay_joy_t delay_joy = {80, 80, 80, 80, 80};
+    double raspyFallTime = INITIAL_FALL_TIME;
+    delay_joy_t delay_joy = {JOYSTICK_DELAY, JOYSTICK_DELAY, JOYSTICK_DELAY, JOYSTICK_DELAY, JOYSTICK_DELAY};
     joyinfo_t coord;
     initializeRaspy();
     while(!game->quit)
@@ -459,25 +450,19 @@ void * th2_display_sound(void* gamep)
     	coord = joy_read();
     	if(game->menu)
     	{
-			
 			pauseAudio();
 			switch(game->menu)
 			{
-				case 2:
-					
+				case 2:					
 					raspyMenu(menuViews[0]);
 					break;
-				case 3:
-					
+				case 3:					
 					raspyMenu(menuViews[1]);
 					break;
 				case 4:
-					
 					raspyMenu(menuViews[2]);
-					
 					break;
 				case 1:
-					
 					raspyMenu(menuViews[3]);
 					break;
 				default: break;
@@ -487,7 +472,7 @@ void * th2_display_sound(void* gamep)
 			   if(game->menu < 4)
 			   {
 					game->menu++;
-					delay_joy.delay_joy_right = 80;
+					delay_joy.delay_joy_right = JOYSTICK_DELAY;
 			   }
 			}
 		
@@ -496,18 +481,16 @@ void * th2_display_sound(void* gamep)
 			   if(game->menu > 1)
 			   {
 					game->menu--;
-					delay_joy.delay_joy_left = 80;
+					delay_joy.delay_joy_left = JOYSTICK_DELAY;
 			   }
 			}
 			if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
 			{
 				if(game->menu == 4)
 				{
-					
-						//disp_clear();
 						game->menu = false;
 						game->gameOver = false;
-						delay_joy.delay_joy_switch = 80;
+						delay_joy.delay_joy_switch = JOYSTICK_DELAY;
 						delay_joy.delay_joy_up = 0;
 						delay_joy.delay_joy_down = 0;
 						delay_joy.delay_joy_left = 0;
@@ -520,17 +503,7 @@ void * th2_display_sound(void* gamep)
 					game->quit = true;
 				}
 			}
-			if(game->menu == 2)
-			{
-				/*if(switch_pressed(&coord))
-				{
-					game->menu = false;
-					game->gameOver = false;
-					delay_joy.delay_joy_switch = 80;
-					sem_post(&s);
-				}*/
-			}
-    	}//
+    	}
     	else if(game->pause)
     	{
 			if (movedLeft(&coord))
@@ -550,7 +523,6 @@ void * th2_display_sound(void* gamep)
 			{
 				pauseAudio();
 				game->menu = true;
-				//disp_clear();
 				game->pause = false;
 			}
     	}
@@ -561,29 +533,28 @@ void * th2_display_sound(void* gamep)
             	coord = joy_read();
                 raspyShowScore(game->score, &coord);
             }
-		//disp_clear();
             initializeGame(game);
             sem_post(&s);
         }
     	else
     	{
-		draw_board(game);
+			draw_board(game);
 			showLevel(game);
 			showNext(game);
 			draw_tetromino(game);
-    			if(raspyFallTime > 0)
+    		if(raspyFallTime > 0)
 			{
-				raspyFallTime -= (1 + game->level /2 );
+				raspyFallTime -= (1 + game->level / 3 );
 			}
 			else
 			{
 				game->activeTetromino.move_down++;
-				raspyFallTime = 5;
+				raspyFallTime = INITIAL_FALL_TIME;
 			}
 
 			if(movedUp(&coord) && !delay_joy.delay_joy_up)
 			{
-				game->activeTetromino.rotate_++;
+				game->activeTetromino.rotate++;
 				delay_joy.delay_joy_up = 10;
 			}
 			if(movedDown(&coord) && !delay_joy.delay_joy_down)
@@ -605,34 +576,14 @@ void * th2_display_sound(void* gamep)
 			{
 				disp_clear();
 				game->pause = true;
-				delay_joy.delay_joy_switch = 80;   		
+				delay_joy.delay_joy_switch = JOYSTICK_DELAY;
 			}
-
-			
     	}
     	delay_joy.delay_joy_down > 0 ? delay_joy.delay_joy_down-- : true;
     	delay_joy.delay_joy_left > 0 ? delay_joy.delay_joy_left-- : true;
     	delay_joy.delay_joy_right > 0 ? delay_joy.delay_joy_right-- : true;
     	delay_joy.delay_joy_up > 0 ? delay_joy.delay_joy_up-- : true;
     	delay_joy.delay_joy_switch > 0 ? delay_joy.delay_joy_switch-- : true;
-
-    	//
-       /* while (!game->menu && !game->quit)
-        {
-            game->gameOver = false;
-            while (!game->gameOver && !game->menu && !game->quit)
-            {
-            	joyinfo_t coord = joy_read();
-                //game->frames += 10;
-
-
-                while (game->pause)
-                {
-
-                }
-
-            }
-        } */
     }
     endAudio();
     pthread_exit(NULL);
@@ -1494,7 +1445,8 @@ static void press_key_delay(keys* pressed_keys, Game* game)
 }
 #else
 
-static void draw_board(Game* game) {
+static void draw_board(Game* game)
+ {
     dcoord_t coords;
     for (int i = 0; i < GRID_HEIGHT; i++)
     {
@@ -1570,10 +1522,11 @@ static void showNext(Game* game)
 
 static void showLevel(Game* game)
 {
-    int x = 11;
     dcoord_t coords;
-    coords.x = x + game->level % 5;
+    coords.x = 11 + game->level % 5; 
     coords.y = 10 + (int)game->level / 5;
+	//10 and 11 are the coordinates in which the levels are drawn
+
     disp_write(coords, D_ON);
     disp_update();
 }
@@ -1700,10 +1653,13 @@ static void raspyShowScore(int score, joyinfo_t* coord) {
     }
 }
 
-static void raspyMenu(int menuScreen[16][16]) {
-dcoord_t coord;
-    for (int i = 0; i < 16; ++i) {
-        for (int j = 0; j < 16; ++j) {
+static void raspyMenu(int menuScreen[16][16]) 
+{
+	dcoord_t coord;
+    for (int i = 0; i < 16; ++i)
+	 {
+        for (int j = 0; j < 16; ++j) 
+		{
             coord.x = j;
             coord.y = i;
             disp_write(coord, menuScreen[i][j]);
