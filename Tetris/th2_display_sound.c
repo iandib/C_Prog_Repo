@@ -498,11 +498,11 @@ void * th2_display_sound(void* gamep)
 					delay_joy.delay_joy_left = 80;
 			   }
 			}
-			if(movedRight(&coord) && !delay_joy.delay_joy_right)
+			if(movedRight(&coord) && !delay_joy.delay_joy_switch)
 			{
 				if(game->menu == 4)
 				{
-					if(switch_pressed(&coord))
+					if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
 					{
 						disp_clear();
 						game->menu = false;
@@ -560,7 +560,7 @@ void * th2_display_sound(void* gamep)
         }
     	else
     	{
-    		if(raspyFallTime > 0)
+    			if(raspyFallTime > 0)
 			{
 				raspyFallTime -= (1 + game->level /2 );
 			}
@@ -570,25 +570,32 @@ void * th2_display_sound(void* gamep)
 				raspyFallTime = 5;
 			}
 
-			if(movedUp(&coord))
+			if(movedUp(&coord) && !delay_joy.delay_joy_up)
 			{
 				game->activeTetromino.rotate_++;
-				SDL_Delay(100);
+				delay_joy.delay_joy_up = 40;
 			}
-			else if(movedDown(&coord))
+			if(movedDown(&coord) && !delay_joy.delay_joy_down)
 			{
 				game->activeTetromino.move_down++;
+				delay_joy.delay_joy_down = 40;
 			}
-			else if(movedLeft(&coord))
+			if(movedLeft(&coord) && !delay_joy.delay_joy_left)
 			{
 				game->activeTetromino.move_left++;
+				delay_joy.delay_joy_left = 40;
 			}
-			else if(movedRight(&coord))
+			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
 				game->activeTetromino.move_right++;
+				delay_joy.delay_joy_right = 40;
 			}
-
-			game->pause = switch_pressed(&coord);
+			if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
+			{
+				disp_clear();
+				game->pause = true;
+				delay_joy.delay_joy_switch = 80;   		
+			}
 
 			draw_board(game);
 			showLevel(game);
