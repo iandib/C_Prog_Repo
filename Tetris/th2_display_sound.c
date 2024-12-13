@@ -450,7 +450,7 @@ void * th2_display_sound(void* gamep)
 	pthread_exit(NULL);
 #else
     double raspyFallTime = 5;
-    delay_joy_t delay_joy = {100, 100, 100, 100, 100};
+    delay_joy_t delay_joy = {80, 80, 80, 80, 80};
     joyinfo_t coord;
     initializeRaspy();
     while(!game->quit)
@@ -462,15 +462,19 @@ void * th2_display_sound(void* gamep)
 			switch(game->menu)
 			{
 				case 2:
+					disp_clear();
 					raspyMenu(menuViews[0]);
 					break;
 				case 3:
+					disp_clear();
 					raspyMenu(menuViews[1]);
 					break;
 				case 4:
+					disp_clear();
 					raspyMenu(menuViews[2]);
 					break;
 				case 1:
+					disp_clear();
 					raspyMenu(menuViews[3]);
 					break;
 				default: break;
@@ -480,7 +484,7 @@ void * th2_display_sound(void* gamep)
 			   if(game->menu < 5)
 			   {
 					game->menu++;
-					delay_joy.delay_joy_right = 100;
+					delay_joy.delay_joy_right = 80;
 			   }
 			}
 			if(movedLeft(&coord) && !delay_joy.delay_joy_left)
@@ -488,7 +492,7 @@ void * th2_display_sound(void* gamep)
 			   if(game->menu > 1)
 			   {
 					game->menu--;
-					delay_joy.delay_joy_left = 100;
+					delay_joy.delay_joy_left = 80;
 			   }
 			}
 			if(game->menu == 2)
