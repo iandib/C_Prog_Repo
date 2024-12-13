@@ -211,21 +211,21 @@ static ALLEGRO_ELEMENTS* allegro = &allegroElements;
 static void draw_board(Game* game);
 static void showNext(Game* game);
 static void showLevel(Game* game);
-static bool checkPause();
+//static bool checkPause();
 static void initializeRaspy();
 static void draw_tetromino(Game* game);
 
-static void raspyShowScore(int score);
+static void raspyShowScore(int score, joyinfo_t* coord);
 static void raspyMenu(Game* game);
 
 extern int digitMatrices[10][8][6];
 extern int menuMatrices[4][8][8];
 
-static bool movedLeft();
-static bool movedRight();
-static bool movedDown();
-static bool movedUp();
-static bool switch_pressed();
+static bool movedLeft(joyinfo_t* coord);
+static bool movedRight(joyinfo_t* coord);
+static bool movedDown(joyinfo_t* coord);
+static bool movedUp(joyinfo_t* coord);
+static bool switch_pressed(joyinfo_t* coord);
 
 #endif
 
@@ -440,23 +440,24 @@ void * th2_display_sound(void* gamep)
 	destroyAllegro(&sprites);
 	pthread_exit(NULL);
 #else
-    double raspyFallTime = 10;
+    double raspyFallTime = 5;
     initializeRaspy();
     while(!game->quit)
     {
         while (game->menu && !game->quit)
         {
+        	joyinfo_t coord = joy_read();
             pauseAudio();
             raspyMenu(game);
-            if (movedRight())
+            if (movedRight(&coord))
             {
                 game->menu = false;
-                initializeGame(game);
+							game->gameOver = false;
                 disp_clear();
                 disp_update();
                 sem_post(&s);
             }
-            else if (movedLeft())
+            else if (movedLeft(&coord))
             {
                 unpauseAudio();
                 game->quit = true;
@@ -470,7 +471,8 @@ void * th2_display_sound(void* gamep)
             game->gameOver = false;
             while (!game->gameOver && !game->menu && !game->quit)
             {
-                game->frames += 10;
+            	joyinfo_t coord = joy_read();
+                //game->frames += 10;
 
                 if(raspyFallTime > 0)
                 {
@@ -482,20 +484,20 @@ void * th2_display_sound(void* gamep)
                     raspyFallTime = 5;
                 }
 
-                if(movedUp())
+                if(movedUp(&coord))
                 {
                     game->activeTetromino.rotate_++;
                     SDL_Delay(100);
                 }
-                else if(movedDown())
+                else if(movedDown(&coord))
                 {
                     game->activeTetromino.move_down++;
                 }
-                else if(movedLeft())
+                else if(movedLeft(&coord))
                 {
                     game->activeTetromino.move_left++;
                 }
-                else if(movedRight())
+                else if(movedRight(&coord))
                 {
                     game->activeTetromino.move_right++;
                 }
@@ -504,16 +506,17 @@ void * th2_display_sound(void* gamep)
                 showNext(game);
                 draw_tetromino(game);
 
-                game->pause = switch_pressed();
+                game->pause = switch_pressed(&coord);
                 while (game->pause)
                 {
-                    if (movedLeft())
+                	joyinfo_t coord = joy_read();
+                    if (movedLeft(&coord))
                     {
                         unpauseAudio();
                         sem_post(&s);
                         game->pause = false;
                     }
-                    else if (movedRight())
+                    else if (movedRight(&coord))
                     {
                         unpauseAudio();
                         initializeGame(game);
@@ -521,7 +524,7 @@ void * th2_display_sound(void* gamep)
                         sem_post(&s);
                         game->pause = false;
                     }
-                    else if (movedUp())
+                    else if (movedUp(&coord))
                     {
                         pauseAudio();
                         game->menu = true;
@@ -531,9 +534,10 @@ void * th2_display_sound(void* gamep)
                 }
                 if (game->gameOver)
                 {
-                    while (!movedRight()) 
+                    while (!movedRight(&coord))
                     {
-                        raspyShowScore(game->score);
+                    	joyinfo_t coord = joy_read();
+                        raspyShowScore(game->score, &coord);
                     }
                     initializeGame(game);
                     sem_post(&s);
@@ -570,9 +574,6 @@ void initialize_leaderboard(Game* game)
 }
 static void update_leaderboard(Game* game)
 {		//NEW HIGHSCOREEEEEEE
-		#ifdef PC
-			//allegro_naming(game->leaderboard[10].name);
-		#endif
 		qsort(game->leaderboard, 10, sizeof(player_t), compare);
 		FILE *leader = fopen("leaderboard.txt", "w");
 		if(leader == NULL)
@@ -639,7 +640,6 @@ void recover_game(Game* game)
 	}
 	fscanf(rescue, "%d", &(game->activeTetromino.shapeIndex));
 	fscanf(rescue, "%d", &(game->activeTetromino.move_down));
-	fscanf(rescue, "%d", &(game->activeTetromino.move_up));
 	fscanf(rescue, "%d", &(game->activeTetromino.move_left));
 	fscanf(rescue, "%d", &(game->activeTetromino.move_right));
 	fscanf(rescue, "%d", &(game->activeTetromino.rotate_));
@@ -657,7 +657,6 @@ void recover_game(Game* game)
 	}
 	fscanf(rescue, "%d", &(game->nextTetromino.shapeIndex));
 	fscanf(rescue, "%d", &(game->nextTetromino.move_down));
-	fscanf(rescue, "%d", &(game->nextTetromino.move_up));
 	fscanf(rescue, "%d", &(game->nextTetromino.move_left));
 	fscanf(rescue, "%d", &(game->nextTetromino.move_right));
 	fscanf(rescue, "%d", &(game->nextTetromino.rotate_));
@@ -709,8 +708,6 @@ static void save_game(Game* game)
 
 	fprintf(save, "%d ", (game->activeTetromino.move_down));
 
-	fprintf(save, "%d ", (game->activeTetromino.move_up));
-
 	fprintf(save, "%d ", (game->activeTetromino.move_left));
 
 	fprintf(save, "%d ", (game->activeTetromino.move_right));
@@ -734,8 +731,6 @@ static void save_game(Game* game)
 	fprintf(save, "%d ", (game->nextTetromino.shapeIndex));
 
 	fprintf(save, "%d ", (game->nextTetromino.move_down));
-
-	fprintf(save, "%d ", (game->nextTetromino.move_up));
 
 	fprintf(save, "%d ", (game->nextTetromino.move_left));
 
@@ -1494,7 +1489,7 @@ static void showLevel(Game* game)
     disp_update();
 }
 
-static bool checkPasue()
+/*static bool checkPasue()
 {
     joyinfo_t coord = joy_read();
     if (coord.y > JOY_MAX_POS / 2)
@@ -1505,7 +1500,7 @@ static bool checkPasue()
     {
         return false;
     }
-}
+}*/
 
 
 
@@ -1527,7 +1522,7 @@ static void initializeRaspy()
     srand(time(NULL));
 }
 
-static void raspyShowScore(int score) {
+static void raspyShowScore(int score, joyinfo_t* coord) {
     // Si el puntaje es 0, dibuja el dígito 0 y retorna
     if (score == 0) {
         // Desplaza el número de derecha a izquierda en el LED
@@ -1546,7 +1541,7 @@ static void raspyShowScore(int score) {
                             disp_write(point, D_ON);
                         }
                     }
-                    if (movedRight()) {
+                    if (movedRight(coord)) {
                         unpauseAudio();
                         disp_clear();
                         disp_update();
@@ -1554,8 +1549,6 @@ static void raspyShowScore(int score) {
                     }
                 }
             }
-
-
             // Actualiza el display
             disp_update();
 
@@ -1564,55 +1557,57 @@ static void raspyShowScore(int score) {
         }
         return;
     }
+    else
+    {
+		// Convierte el número en un array de dígitos
+		int digits_array[6];
+		for (int i = 5; i >= 0; i--) {
+			digits_array[i] = score % 10;
+			score /= 10;
+		}
 
-    // Convierte el número en un array de dígitos
-    int digits_array[6];
-    for (int i = 5; i >= 0; i--) {
-        digits_array[i] = score % 10;
-        score /= 10;
-    }
+		// Encuentra el primer dígito no cero
+		int firstNonZero = 0;
+		while (firstNonZero < 6 && digits_array[firstNonZero] == 0) {
+			firstNonZero++;
+		}
 
-    // Encuentra el primer dígito no cero
-    int firstNonZero = 0;
-    while (firstNonZero < 6 && digits_array[firstNonZero] == 0) {
-        firstNonZero++;
-    }
+		// Desplaza el número de derecha a izquierda en el LED
+		for (int offset_x = 16 - 6, offset_y = 8 - 4; offset_x >= -6 - 30; offset_x--) {
+			// Borra el contenido actual del buffer
+			disp_clear();
 
-    // Desplaza el número de derecha a izquierda en el LED
-    for (int offset_x = 16 - 6, offset_y = 8 - 4; offset_x >= -6 - 30; offset_x--) {
-        // Borra el contenido actual del buffer
-        disp_clear();
+			// Coloca los dígitos en el buffer con el desplazamiento actual
+			for (int i = firstNonZero; i < 6; i++) {
+				int x_start = (i - firstNonZero) * 6;
 
-        // Coloca los dígitos en el buffer con el desplazamiento actual
-        for (int i = firstNonZero; i < 6; i++) {
-            int x_start = (i - firstNonZero) * 6;
+				for (int j = 0; j < 8; j++) {
+					for (int k = 0; k < 6; k++) {
+						if (x_start + k + offset_x >= 0 && x_start + k + offset_x < 16) {
+							int x = x_start + k + offset_x;
+							int y = j + offset_y;
 
-            for (int j = 0; j < 8; j++) {
-                for (int k = 0; k < 6; k++) {
-                    if (x_start + k + offset_x >= 0 && x_start + k + offset_x < 16) {
-                        int x = x_start + k + offset_x;
-                        int y = j + offset_y;
+							if (digitMatrices[digits_array[i]][j][k] == 1 && y >= 0 && y < 16) {
+								dcoord_t point = { x, y };
+								disp_write(point, D_ON);
+							}
+						}
+						if (movedRight(coord)) {
+							unpauseAudio();
+							disp_clear();
+							disp_update();
+							return;
+						}
+					}
+				}
+			}
 
-                        if (digitMatrices[digits_array[i]][j][k] == 1 && y >= 0 && y < 16) {
-                            dcoord_t point = { x, y };
-                            disp_write(point, D_ON);
-                        }
-                    }
-                    if (movedRight()) {
-                        unpauseAudio();
-                        disp_clear();
-                        disp_update();
-                        return;
-                    }
-                }
-            }
-        }
+			// Actualiza el display
+			disp_update();
 
-        // Actualiza el display
-        disp_update();
-
-        // Espera un tiempo (ajusta según sea necesario)
-        usleep(50000); // 50 milisegundos
+			// Espera un tiempo (ajusta según sea necesario)
+			usleep(50000); // 50 milisegundos
+		}
     }
 }
 
@@ -1658,54 +1653,40 @@ static void raspyMenu(Game* game) {
     // Actualizar la pantalla
     disp_update();
 }
-static bool movedLeft()
+static bool movedLeft(joyinfo_t* coord)
 {
-	joyinfo_t coord = joy_read();
-    if (coord.x < JOY_MAX_NEG/2){
+    if (coord->x < JOY_MAX_NEG/2){
     	return true;
     }
-    else{
-    	return false;
-    }
+    return false;
 }
-static bool movedRight()
+static bool movedRight(joyinfo_t* coord)
 {
-	joyinfo_t coord = joy_read();
-    if (coord.x > JOY_MAX_POS/2){
+    if (coord->x > JOY_MAX_POS/2){
     	return true;
     }
-    else{
-    	return false;
-    }
+    return false;
 }
 
-static bool movedDown()
+static bool movedDown(joyinfo_t* coord)
 {
-	joyinfo_t coord = joy_read();
-	if (coord.y < JOY_MAX_NEG/2){
+	if (coord->y < JOY_MAX_NEG/2){
 		return true;
 	}
-	else{
-    	return false;
-    }
+	return false;
 }
-static bool movedUp()
+static bool movedUp(joyinfo_t* coord)
 {
-	joyinfo_t coord = joy_read();
-	if (coord.y > JOY_MAX_POS / 2)
+	if (coord->y > JOY_MAX_POS / 2)
 	{
 		return true;
 	}
-	else
-	{
-		return false;
-	}
+	return false;
 }
 
-static bool switch_pressed()
+static bool switch_pressed(joyinfo_t* coord)
 {
-	joyinfo_t coord = joy_read();
-	if (coord.sw == J_PRESS){
+	if (coord->sw == J_PRESS){
 		return true;
 	}
     return false;

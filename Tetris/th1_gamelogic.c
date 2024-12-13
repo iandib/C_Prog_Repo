@@ -50,6 +50,7 @@ extern sem_t s;
 void * th1_gamelogic(void* gamep)
 {
 	Game* game = gamep;													//First, the game struct and leaderboard [TO BE CHECKED] are initialized.
+	srand(time(NULL));													//rand() seed is properly set for a future run
 	initializeGame(game);
 	initialize_leaderboard(game);
     FILE* save = fopen("saving.txt", "r");								//If we happen to find an old game, it is restored and pause screen is automatically activated, and if we do not, we will find the menu as soon as we enter the game.
@@ -62,7 +63,6 @@ void * th1_gamelogic(void* gamep)
 	{
     	game->menu = true;
 	}
-	srand(time(NULL));													//rand() seed is properly set for a future run
 	while(!game->quit)
 	{
 		if(!game->menu && !game->pause && !game->gameOver && !game->restart)				//We essentially have 4 states, menu, pause, game over and game. The program runs what is inside this conditional when it is in game. Whereas, the th1 waits for a signal from the semaphore which would be set soon in th2
@@ -126,7 +126,6 @@ void * th1_gamelogic(void* gamep)
 	            playSoundIndex(GAME_OVER);
 		    }
 			game->redraw = true;										//Now we are ready to redraw our grid and HUD
-			game->frames++;												//[TO BE CHECKED]
 		}
 		else															//As soon as we run the program, this conditional is reached. Generating a new tetromino will be necessary, unless we have an old game loaded. If we do, we previously said that the program would go directly to the pause screen
 		{
@@ -150,7 +149,6 @@ void initializeGame(Game* game)											//Sets initial values
 {
 	game->menu = true;
 	game->gameOver = false;
-	game->frames = 0;
 	game->score = 0;
 	game->highScoreIndex = 0;
 	game->level = 0;
@@ -298,7 +296,8 @@ static void updateLevel(Game* game)								// Updates game level. This depends o
 void generateNewTetromino(Game* game)							// Generates a new random tetromino
 {
     int shapeIndex = rand() % NUM_SHAPES;						// Randomly selects a shape index for the new tetromino
-    if (game->frames)									// If the game has already started
+    static bool first_tetromino = true;
+    if (!first_tetromino)									// If the game has already started
     {
         if (game->nextTetromino.shapeIndex == I)		       			 // Updates the active tetromino with the new shape and position. Corrects the tetromino initial position
         {
@@ -315,7 +314,6 @@ void generateNewTetromino(Game* game)							// Generates a new random tetromino
 	game->activeTetromino.shapeIndex = game->nextTetromino.shapeIndex;
 	game->activeTetromino.rotation = game->nextTetromino.rotation;
 	game->activeTetromino.move_down = game->nextTetromino.move_down;
-	game->activeTetromino.move_up = game->nextTetromino.move_up;
 	game->activeTetromino.move_left = game->nextTetromino.move_left;
 	game->activeTetromino.move_right = game->nextTetromino.move_right;
 	game->activeTetromino.rotate_ = game->nextTetromino.rotate_;
@@ -328,6 +326,7 @@ void generateNewTetromino(Game* game)							// Generates a new random tetromino
     }
     else											//If we still need to create the first active tetromino (in case we are initializing a new game)
     {
+    	first_tetromino = false;
         game->nextTetromino.x = GRID_WIDTH / 2 - 1;						// Update the next tetromino with the new shape and position
         game->nextTetromino.y = 0;
         copyShape(tetrominoShapes[shapeIndex][0], game, false);					//Copies the next tetromino shape that was chosen with rand() to the next tetromino shape matrix in the game structure
@@ -358,7 +357,6 @@ void generateNewTetromino(Game* game)							// Generates a new random tetromino
     }
     game->nextTetromino.rotation = 0;								//Basic initial values are set for the next tetromino
     game->nextTetromino.move_down = 0;
-    game->nextTetromino.move_up = 0;
     game->nextTetromino.move_left = 0;
     game->nextTetromino.move_right = 0;
     game->nextTetromino.rotate_ = 0;

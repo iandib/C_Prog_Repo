@@ -12,7 +12,7 @@
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-#define PC true
+//#define PC true
 
 #define NUM_SHAPES 7
 #define TETROMINO_W 4
@@ -22,18 +22,15 @@
 #define GRID_WIDTH 10
 
 #ifdef PC
-#define GRID_HEIGHT 20
-#else
-#define GRID_HEIGHT 16
-#endif
-
+#define FIX_DELAY 10
 #define FPS 60
 #define KEY_DELAY -15
-
-#ifdef PC
-#define FIX_DELAY 10
+#define GRID_HEIGHT 20
 #else
 #define FIX_DELAY 5
+#define GRID_HEIGHT 16
+#define JOY_ON_DELAY 6
+#define CLEAR_JOY_COORD_DELAY 3
 #endif
 
  /*******************************************************************************
@@ -72,7 +69,6 @@ typedef struct {
     int shape[TETROMINO_H][TETROMINO_W];
     int shapeIndex;
     int move_down;			//Add to the recover/save functions!!!
-    int move_up;
     int move_left;
     int move_right;
     int rotate_;
@@ -95,7 +91,6 @@ typedef struct {
     bool hasLevelChanged; /*flag to check whether the level has been upgraded.
                          It is declared here to avoid using global variables unnecesarely */
     bool gameOver; // Game over flag
-    long frames; // Frame counter
     int lines; // Cleared lines counter
     int levelCheckpoint; // Level checkpoint
     int fixDelay; // Bottom row movement buffer	//SACO
@@ -105,7 +100,7 @@ typedef struct {
     bool waitingForExit; // Waiting for exit flag	//SACO
     bool menu; // Menu flag
     int statistics[NUM_SHAPES]; // Statistics
-    bool restart;
+    bool restart;	//True whenever we need to restart a game
 }Game;
 
 #endif // _COMMON_H_
