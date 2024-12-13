@@ -1431,7 +1431,7 @@ static void draw_board(Game* game) {
     }
     disp_update();
 }
-
+//
 static void draw_tetromino(Game* game)
 {
     dcoord_t coords;
