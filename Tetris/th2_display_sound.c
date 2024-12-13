@@ -455,10 +455,11 @@ void * th2_display_sound(void* gamep)
     initializeRaspy();
     while(!game->quit)
     {
+	    disp_clear();
     	coord = joy_read();
     	if(game->menu)
     	{
-			disp_clear();
+			
 			pauseAudio();
 			switch(game->menu)
 			{
@@ -483,7 +484,7 @@ void * th2_display_sound(void* gamep)
 			}
 			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
-			   if(game->menu < 5)
+			   if(game->menu < 4)
 			   {
 					game->menu++;
 					delay_joy.delay_joy_right = 80;
@@ -498,19 +499,18 @@ void * th2_display_sound(void* gamep)
 					delay_joy.delay_joy_left = 80;
 			   }
 			}
-			if(movedRight(&coord) && !delay_joy.delay_joy_switch)
+			if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
 			{
 				if(game->menu == 4)
 				{
-					if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
-					{
-						disp_clear();
+					
+						//disp_clear();
 						game->menu = false;
 						game->gameOver = false;
 						delay_joy.delay_joy_switch = 80;
 						
 						sem_post(&s);
-				   	}
+				   	
 				}
 			}
 			if(game->menu == 2)
@@ -543,7 +543,7 @@ void * th2_display_sound(void* gamep)
 			{
 				pauseAudio();
 				game->menu = true;
-				disp_clear();
+				//disp_clear();
 				game->pause = false;
 			}
     	}
@@ -554,12 +554,16 @@ void * th2_display_sound(void* gamep)
             	coord = joy_read();
                 raspyShowScore(game->score, &coord);
             }
-		disp_clear();
+		//disp_clear();
             initializeGame(game);
             sem_post(&s);
         }
     	else
     	{
+		draw_board(game);
+			showLevel(game);
+			showNext(game);
+			draw_tetromino(game);
     			if(raspyFallTime > 0)
 			{
 				raspyFallTime -= (1 + game->level /2 );
@@ -597,10 +601,7 @@ void * th2_display_sound(void* gamep)
 				delay_joy.delay_joy_switch = 80;   		
 			}
 
-			draw_board(game);
-			showLevel(game);
-			showNext(game);
-			draw_tetromino(game);
+			
     	}
     	delay_joy.delay_joy_down > 0 ? delay_joy.delay_joy_down-- : true;
     	delay_joy.delay_joy_left > 0 ? delay_joy.delay_joy_left-- : true;
