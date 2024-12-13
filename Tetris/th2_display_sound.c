@@ -241,6 +241,14 @@ void playSoundIndex(int soundIndex);
 extern int tetrominoShapes[NUM_SHAPES][TETROMINO_R][TETROMINO_H][TETROMINO_W];
 extern sem_t s;
 
+typedef struct
+{
+	short int delay_joy_down;
+	short int delay_joy_left;
+	short int delay_joy_right;
+	short int delay_joy_up;
+	short int delay_joy_switch;
+} delay_joy_t;
 
 void * th2_display_sound(void* gamep)
 {
@@ -442,6 +450,7 @@ void * th2_display_sound(void* gamep)
 	pthread_exit(NULL);
 #else
     double raspyFallTime = 5;
+    delay_joy_t delay_joy = {100, 100, 100, 100, 100};
     joyinfo_t coord;
     initializeRaspy();
     while(!game->quit)
@@ -466,23 +475,32 @@ void * th2_display_sound(void* gamep)
 					break;
 				default: break;
 			}
-			if (movedRight(&coord))
+			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
 			   if(game->menu < 5)
 			   {
 					game->menu++;
-					SDL_Delay(5000);
+					delay_joy.delay_joy_right = 100;
 			   }
 			}
-			else if (movedLeft(&coord))
+			if(movedLeft(&coord) && && !delay_joy.delay_joy_left)
 			{
 			   if(game->menu > 1)
 			   {
 					game->menu--;
-					SDL_Delay(5000);
+					delay_joy.delay_joy_left = 100;
 			   }
 			}
-    	}
+			if(game->menu == 2)
+			{
+				if(switch_pressed(&coord))
+				{
+					game->menu = false;
+					game->gameOver = false;
+					sem_post(&s);
+				}
+			}
+    	}//
     	else if(game->pause)
     	{
 			if (movedLeft(&coord))
@@ -552,7 +570,14 @@ void * th2_display_sound(void* gamep)
 			showLevel(game);
 			showNext(game);
 			draw_tetromino(game);
-    	}//
+    	}
+    	delay_joy.delay_joy_down > 0 ? delay_joy.delay_joy_down-- : true;
+    	delay_joy.delay_joy_left > 0 ? delay_joy.delay_joy_left-- : true;
+    	delay_joy.delay_joy_right > 0 ? delay_joy.delay_joy_right-- : true;
+    	delay_joy.delay_joy_up > 0 ? delay_joy.delay_joy_up-- : true;
+    	delay_joy.delay_joy_switch > 0 ? delay_joy.delay_joy_switch-- : true;
+
+    	//
        /* while (!game->menu && !game->quit)
         {
             game->gameOver = false;
