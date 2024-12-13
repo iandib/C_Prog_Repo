@@ -508,7 +508,10 @@ void * th2_display_sound(void* gamep)
 						game->menu = false;
 						game->gameOver = false;
 						delay_joy.delay_joy_switch = 80;
-						
+						delay_joy.delay_joy_up = 0;
+						delay_joy.delay_joy_down = 0;
+						delay_joy.delay_joy_left = 0;
+						delay_joy.delay_joy_right = 0;
 						sem_post(&s);
 				   	
 				}
@@ -577,22 +580,22 @@ void * th2_display_sound(void* gamep)
 			if(movedUp(&coord) && !delay_joy.delay_joy_up)
 			{
 				game->activeTetromino.rotate_++;
-				delay_joy.delay_joy_up = 40;
+				delay_joy.delay_joy_up = 10;
 			}
 			if(movedDown(&coord) && !delay_joy.delay_joy_down)
 			{
 				game->activeTetromino.move_down++;
-				delay_joy.delay_joy_down = 40;
+				delay_joy.delay_joy_down = 10;
 			}
 			if(movedLeft(&coord) && !delay_joy.delay_joy_left)
 			{
 				game->activeTetromino.move_left++;
-				delay_joy.delay_joy_left = 40;
+				delay_joy.delay_joy_left = 10;
 			}
 			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
 				game->activeTetromino.move_right++;
-				delay_joy.delay_joy_right = 40;
+				delay_joy.delay_joy_right = 10;
 			}
 			if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
 			{
