@@ -26,11 +26,15 @@
 #define FPS 60
 #define KEY_DELAY -15
 #define GRID_HEIGHT 20
+
 #else
 #define FIX_DELAY 5
 #define GRID_HEIGHT 16
 #define JOY_ON_DELAY 6
 #define CLEAR_JOY_COORD_DELAY 3
+
+#define NUMBER_OF_SLIDES 4
+
 #endif
 
  /*******************************************************************************
@@ -58,6 +62,15 @@ enum SFXIndex
     FIX,
     GAME_OVER,
     VICTORY
+};
+
+enum menuViews //common.c
+{
+    TITLE = 0,
+    INSTRUCTION_1, 
+    INSTRUCTION_2,
+    PLAY,
+    EXIT,
 };
 
 // Typedefs
