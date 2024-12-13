@@ -444,6 +444,9 @@ void * th2_display_sound(void* gamep)
     delay_joy_t delay_joy = {JOYSTICK_DELAY, JOYSTICK_DELAY, JOYSTICK_DELAY, JOYSTICK_DELAY, JOYSTICK_DELAY};
     joyinfo_t coord;
     initializeRaspy();
+	raspyMenu(menuViews[TITLE]);
+	SDL_Delay(6000);
+
     while(!game->quit)
     {
 	    disp_clear();
@@ -453,23 +456,25 @@ void * th2_display_sound(void* gamep)
 			pauseAudio();
 			switch(game->menu)
 			{
-				case 2:					
-					raspyMenu(menuViews[0]);
+				/* The number in case corresponds to the index in menuViews. There an offset of 1 because
+				game->menu needs to be true for the game to stay in the menu. */
+				case PLAY:				
+					raspyMenu(menuViews[PLAY]);
 					break;
-				case 3:					
-					raspyMenu(menuViews[1]);
+				case EXIT:					
+					raspyMenu(menuViews[EXIT]);
 					break;
-				case 4:
-					raspyMenu(menuViews[2]);
+				case INSTRUCTION_1:
+					raspyMenu(menuViews[INSTRUCTION_1]);
 					break;
-				case 1:
-					raspyMenu(menuViews[3]);
+				case INSTRUCTION_2:
+					raspyMenu(menuViews[INSTRUCTION_2]);
 					break;
 				default: break;
 			}
 			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
-			   if(game->menu < 4)
+			   if(game->menu <= NUMBER_OF_SLIDES)
 			   {
 					game->menu++;
 					delay_joy.delay_joy_right = JOYSTICK_DELAY;
@@ -486,7 +491,7 @@ void * th2_display_sound(void* gamep)
 			}
 			if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
 			{
-				if(game->menu == 4)
+				if(game->menu == PLAY)
 				{
 						game->menu = false;
 						game->gameOver = false;
@@ -498,7 +503,7 @@ void * th2_display_sound(void* gamep)
 						sem_post(&s);
 				   	
 				}
-				else if(game->menu == 1)
+				else if(game->menu == EXIT)
 				{
 					game->quit = true;
 				}
@@ -554,7 +559,7 @@ void * th2_display_sound(void* gamep)
 
 			if(movedUp(&coord) && !delay_joy.delay_joy_up)
 			{
-				game->activeTetromino.rotate++;
+				game->activeTetromino.rotate_++;
 				delay_joy.delay_joy_up = 10;
 			}
 			if(movedDown(&coord) && !delay_joy.delay_joy_down)
@@ -1648,7 +1653,7 @@ static void raspyShowScore(int score, joyinfo_t* coord) {
 			disp_update();
 
 			// Espera un tiempo (ajusta según sea necesario)
-			usleep(50000); // 50 milisegundos
+			SDL_Delay(50); // 50 milisegundos
 		}
     }
 }
@@ -1656,6 +1661,7 @@ static void raspyShowScore(int score, joyinfo_t* coord) {
 static void raspyMenu(int menuScreen[16][16]) 
 {
 	dcoord_t coord;
+
     for (int i = 0; i < 16; ++i)
 	 {
         for (int j = 0; j < 16; ++j) 
@@ -1707,4 +1713,3 @@ static bool switch_pressed(joyinfo_t* coord)
     return false;
 }
 #endif
-
