@@ -473,6 +473,7 @@ void * th2_display_sound(void* gamep)
 				case 4:
 					
 					raspyMenu(menuViews[2]);
+					
 					break;
 				case 1:
 					
@@ -496,12 +497,26 @@ void * th2_display_sound(void* gamep)
 					delay_joy.delay_joy_left = 80;
 			   }
 			}
+			if(movedRight(&coord) && !delay_joy.delay_joy_right)
+			{
+			if(game->menu == 4)
+			{
+				if(switch_pressed(&coord))
+				{
+					game->menu = false;
+					game->gameOver = false;
+					delay_joy.delay_joy_switch = 80;
+					disp_clear();
+					sem_post(&s);
+			   	}
+			}
 			if(game->menu == 2)
 			{
 				if(switch_pressed(&coord))
 				{
 					game->menu = false;
 					game->gameOver = false;
+					delay_joy.delay_joy_switch = 80;
 					sem_post(&s);
 				}
 			}
@@ -536,6 +551,7 @@ void * th2_display_sound(void* gamep)
             	coord = joy_read();
                 raspyShowScore(game->score, &coord);
             }
+		disp_clear();
             initializeGame(game);
             sem_post(&s);
         }
