@@ -65,7 +65,7 @@ void * th1_gamelogic(void* gamep)
 	srand(time(NULL));													//rand() seed is properly set for a future run
 	while(!game->quit)
 	{
-		if(!game->menu && !game->pause && !game->gameOver)				//We essentially have 4 states, menu, pause, game over and game. The program runs what is inside this conditional when it is in game. Whereas, the th1 waits for a signal from the semaphore which would be set soon in th2
+		if(!game->menu && !game->pause && !game->gameOver && !game->restart)				//We essentially have 4 states, menu, pause, game over and game. The program runs what is inside this conditional when it is in game. Whereas, the th1 waits for a signal from the semaphore which would be set soon in th2
 		{
 			if(game->activeTetromino.move_down)							//If the tetromino was moved down, whether it was caused by the fall-timer od by user clicking, the program will check if that is a valid action
 			{
@@ -132,9 +132,15 @@ void * th1_gamelogic(void* gamep)
 		{
 			if(game->menu || game->gameOver)
 			{
-				generateNewTetromino(game);
+				//generateNewTetromino(game);
 			}
 			sem_wait(&s);												//The program waits here for the user to start the game
+			if(game->restart)
+			{
+				initializeGame(game);
+
+				remove("saving.txt");
+			}
 		}
 	}
 	pthread_exit(0);													//Finally, if the quit flag is activated, this process is killed
@@ -142,6 +148,7 @@ void * th1_gamelogic(void* gamep)
 
 void initializeGame(Game* game)											//Sets initial values
 {
+	game->menu = true;
 	game->gameOver = false;
 	game->frames = 0;
 	game->score = 0;
@@ -155,6 +162,7 @@ void initializeGame(Game* game)											//Sets initial values
 	game->quit = false;
 	game->pause = false;
 	game->redraw = true;
+	game->restart = false;
 
 	initialize_leaderboard(game);										//[TO BE CHECKED]
 
@@ -166,6 +174,7 @@ void initializeGame(Game* game)											//Sets initial values
 			game->tetrominoGrid[i][j] = 0;
 		}
 	}
+	generateNewTetromino(game);
 }
 
 static bool canMoveSideways(Game* game, int xOffset)						// Checks if the tetromino can move horizontally in the specified direction, returning true if it can, and false if it cannot

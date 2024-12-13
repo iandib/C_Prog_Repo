@@ -12,7 +12,7 @@
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
  ******************************************************************************/
 
-//#define PC true
+#define PC true
 
 #define NUM_SHAPES 7
 #define TETROMINO_W 4
@@ -105,6 +105,7 @@ typedef struct {
     bool waitingForExit; // Waiting for exit flag	//SACO
     bool menu; // Menu flag
     int statistics[NUM_SHAPES]; // Statistics
+    bool restart;
 }Game;
 
 #endif // _COMMON_H_

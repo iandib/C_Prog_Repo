@@ -307,11 +307,13 @@ void * th2_display_sound(void* gamep)
 							break;
 
 						case ALLEGRO_KEY_UP:
-							game->pause = false;
-							initializeGame(game);
-							generateNewTetromino(game);
-							remove("saving.txt");
-							al_start_timer(allegro->fallingTimer);
+							game->restart = true;
+							//game->pause = false;
+							//game->restart = true;
+							//initializeGame(game);
+							//generateNewTetromino(game);
+							//remove("saving.txt");
+							//al_start_timer(allegro->fallingTimer);
 							sem_post(&s);
 
 							break;
@@ -329,11 +331,13 @@ void * th2_display_sound(void* gamep)
 					switch(event.keyboard.keycode)
 					{
 						case ALLEGRO_KEY_SPACE:
-							game->menu = true;
-							game->gameOver = false;
+							//game->menu = true;
+							//game->gameOver = false;
+							game->restart = true;
 							al_stop_timer(allegro->fallingTimer);
-							initializeGame(game);
-							generateNewTetromino(game);
+							sem_post(&s);
+							//initializeGame(game);
+							//generateNewTetromino(game);
 							break;
 					}
 				}
