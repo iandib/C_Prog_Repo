@@ -77,6 +77,7 @@
 #define MOVE "moveSideways.wav"
 #define ROT "rotate.wav"
 #define LEVEL "tetris.wav"
+#define FIX "fix.wav"
 
 #define INITIAL_FALL_TIME 40
 #define JOYSTICK_DELAY 50
@@ -507,6 +508,7 @@ void * th2_display_sound(void* gamep)
 				else if(game->menu == EXIT)
 				{
 					game->quit = true;
+					sem_post(&s);
 				}
 			}
     	}
@@ -592,6 +594,8 @@ void * th2_display_sound(void* gamep)
     	delay_joy.delay_joy_switch > 0 ? delay_joy.delay_joy_switch-- : true;
     }
     endAudio();
+	disp_clear();
+	disp_update();
     pthread_exit(NULL);
 #endif
 }
