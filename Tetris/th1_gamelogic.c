@@ -61,7 +61,7 @@ void * th1_gamelogic(void* gamep)
 	}
     else
 	{
-    	game->menu = 2;
+    	game->menu = PLAY;
 	}
 	while(!game->quit)
 	{
@@ -73,6 +73,7 @@ void * th1_gamelogic(void* gamep)
 				{
 					game->activeTetromino.y++;
 					game->activeTetromino.move_down--;
+					playSoundIndex(MOVE_SIDEWAYS);
 				}
 				else													//If not, that is because we have reached a surface and the program gets ready to fix the tetromino
 				{

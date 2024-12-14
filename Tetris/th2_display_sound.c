@@ -493,15 +493,16 @@ void * th2_display_sound(void* gamep)
 			{
 				if(game->menu == PLAY)
 				{
-						game->menu = false;
-						game->gameOver = false;
-						delay_joy.delay_joy_switch = JOYSTICK_DELAY;
-						delay_joy.delay_joy_up = 0;
-						delay_joy.delay_joy_down = 0;
-						delay_joy.delay_joy_left = 0;
-						delay_joy.delay_joy_right = 0;
-						sem_post(&s);
-				   	
+                    unpauseAudio();
+                    game->menu = false;
+                    game->gameOver = false;
+                    delay_joy.delay_joy_switch = JOYSTICK_DELAY;
+                    delay_joy.delay_joy_up = 0;
+                    delay_joy.delay_joy_down = 0;
+                    delay_joy.delay_joy_left = 0;
+                    delay_joy.delay_joy_right = 0;
+                    sem_post(&s);
+                
 				}
 				else if(game->menu == EXIT)
 				{
