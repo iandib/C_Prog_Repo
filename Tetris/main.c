@@ -5,7 +5,7 @@
  */
 
 #include "Back_End/game_logic.h"
-#include "Front_End/display_sound.h"
+#include "th2_display_sound.h"
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdio.h>

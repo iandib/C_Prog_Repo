@@ -42,7 +42,7 @@
 #include "game_logic.h"
 
 // Header containing display and sound function prototypes
-#include "../Front_End/display_sound.h"
+#include "../th2_display_sound.h"
 
 /* ---------------------- GLOBAL VARIABLES ---------------------- */
 

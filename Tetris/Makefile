@@ -23,7 +23,7 @@ EXEC := tetris
 SRCS_UNI := main.c \
         	Back_End/game_logic.c \
         	Back_End/utilities.c \
-        	Front_End/display_sound.c
+        	th2_display_sound.c
 
 SRCS_RPI := ../libs/joydisp/joydrv.c \
         	../libs/joydisp/disdrv.c \
@@ -33,7 +33,7 @@ SRCS_RPI := ../libs/joydisp/joydrv.c \
 OBJS_UNI := main.o \
         	Back_End/game_logic.o \
         	Back_End/utilities.o \
-        	Front_End/display_sound.o
+        	th2_display_sound.o
 
 OBJS_RPI := ../libs/joydisp/joydrv.o \
             ../libs/joydisp/disdrv.o \
@@ -61,7 +61,7 @@ ${EXEC}: ${OBJS}
 	${CC} ${OBJS} ${CFLAGS} ${LDFLAGS} -o ${EXEC}
 
 # Rule to generate the object files
-main.o: main.c Back_End/game_logic.h Front_End/display_sound.h
+main.o: main.c Back_End/game_logic.h th2_display_sound.h
 	${CC} ${CFLAGS} -c main.c -o main.o
 
 Back_End/game_logic.o: Back_End/game_logic.c Back_End/game_logic.h Back_End/utilities.h
@@ -70,8 +70,8 @@ Back_End/game_logic.o: Back_End/game_logic.c Back_End/game_logic.h Back_End/util
 Back_End/utilities.o: Back_End/utilities.c Back_End/utilities.h
 	${CC} ${CFLAGS} -c Back_End/utilities.c -o Back_End/utilities.o
 
-Front_End/display_sound.o: Front_End/display_sound.c Front_End/display_sound.h Back_End/utilities.h
-	${CC} ${CFLAGS} -c Front_End/display_sound.c -o Front_End/display_sound.o
+th2_display_sound.o: th2_display_sound.c th2_display_sound.h Back_End/utilities.h
+	${CC} ${CFLAGS} -c th2_display_sound.c -o th2_display_sound.o
 
 ../libs/joydisp/joydrv.o: ../libs/joydisp/joydrv.c ../libs/joydisp/joydrv.h
 	${CC} ${CFLAGS} -c ../libs/joydisp/joydrv.c -o ../libs/joydisp/joydrv.o
