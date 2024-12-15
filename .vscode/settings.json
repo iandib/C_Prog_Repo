@@ -8,6 +8,12 @@
         "stdio.h": "c",
         "hardware.h": "c",
         "stdint.h": "c",
-        "compare": "cpp"
+        "compare": "cpp",
+        "common.h": "c",
+        "utilities.h": "c",
+        "game_logic.h": "c",
+        "stdbool.h": "c",
+        "stdlib.h": "c",
+        "allegro_image.h": "c"
     }
 }

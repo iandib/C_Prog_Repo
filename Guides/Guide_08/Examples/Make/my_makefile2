@@ -1,0 +1,8 @@
+hello: hello.o print.o
+	gcc hello.o print.o -o hello -Wall
+
+hello.o: hello.c print.h
+	gcc hello.c -c -Wall
+
+print.o: print.c print.h
+	gcc print.c -c -Wall
