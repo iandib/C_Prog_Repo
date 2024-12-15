@@ -17,7 +17,6 @@
 /* ---------------- MACROS & CONSTANTS (UNIVERSAL) ---------------- */
 
 // Flag to indicate if the game is running on a PC
-#define PC true
 
 // Number of unique tetromino shapes in the game
 #define NUM_SHAPES 7
@@ -67,6 +66,8 @@
 
 // Delay (in frames) before clearing joystick coordinates
 #define CLEAR_JOY_COORD_DELAY 3
+
+#define NUMBER_OF_SLIDES 5
 
 #endif // PC
 

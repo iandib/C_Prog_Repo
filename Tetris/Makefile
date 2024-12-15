@@ -25,10 +25,6 @@ SRCS_UNI := main.c \
         	Back_End/utilities.c \
         	th2_display_sound.c
 
-SRCS_RPI := ../libs/joydisp/joydrv.c \
-        	../libs/joydisp/disdrv.c \
-        	../libs/audio/SDL2/libAudioSDL2.c
-
 # Object files
 OBJS_UNI := main.o \
         	Back_End/game_logic.o \
@@ -42,14 +38,14 @@ OBJS_RPI := ../libs/joydisp/joydrv.o \
 # ---------------------- DETECT PLATFORM -----------------------
 
 # Check if PC is defined in utilities.h
-IS_PC := $(shell grep -q "#define PC" Back_End/utilities.h && echo 1 || echo 0)
+IS_PC := $(shell grep -q "\#define PC" Back_End/utilities.h && echo 1 || echo 0)
 
 ifeq ($(IS_PC), 1)
     SRCS := $(SRCS_UNI)
     OBJS := $(OBJS_UNI)
     LDFLAGS := $(LDFLAGS_PC)
 else
-    SRCS := $(SRCS_UNI) $(SRCS_RPI)
+    SRCS := $(SRCS_UNI)
     OBJS := $(OBJS_UNI) $(OBJS_RPI)
     LDFLAGS := $(LDFLAGS_RPI)
 endif
@@ -72,15 +68,6 @@ Back_End/utilities.o: Back_End/utilities.c Back_End/utilities.h
 
 th2_display_sound.o: th2_display_sound.c th2_display_sound.h Back_End/utilities.h
 	${CC} ${CFLAGS} -c th2_display_sound.c -o th2_display_sound.o
-
-../libs/joydisp/joydrv.o: ../libs/joydisp/joydrv.c ../libs/joydisp/joydrv.h
-	${CC} ${CFLAGS} -c ../libs/joydisp/joydrv.c -o ../libs/joydisp/joydrv.o
-
-../libs/joydisp/disdrv.o: ../libs/joydisp/disdrv.c ../libs/joydisp/disdrv.h
-	${CC} ${CFLAGS} -c ../libs/joydisp/disdrv.c -o ../libs/joydisp/disdrv.o
-
-../libs/audio/SDL2/libAudioSDL2.o: ../libs/audio/SDL2/libAudioSDL2.c ../libs/audio/SDL2/src/audio.h
-	${CC} ${CFLAGS} -c ../libs/audio/SDL2/libAudioSDL2.c -o ../libs/audio/SDL2/libAudioSDL2.o
 
 # ----------------------- CLEANING RULES -----------------------
 
