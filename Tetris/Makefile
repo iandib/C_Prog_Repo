@@ -8,7 +8,7 @@
 CC := gcc
 
 # Compilator flags
-CFLAGS := -g -Wall -DPC
+CFLAGS := -g -Wall
 
 # Detect Operating System
 OS := $(shell uname -s)
@@ -48,6 +48,9 @@ OBJS_RPI := ../libs/joydisp/joydrv.o \
             ../libs/audio/SDL2/libAudioSDL2.o
 
 # ----------------------- COMPILATION RULES -----------------------
+
+# Add the -DPC flag to the PC executable
+${EXEC_PC}: CFLAGS += -DPC
 
 # Rule to generate the PC executable
 ${EXEC_PC}: ${OBJS}
