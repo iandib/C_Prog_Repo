@@ -28,9 +28,9 @@ El programa cumple con todos los requisitos fundamentales del juego Tetris:
 
 **Funciones Adicionales**
 - Sonidos y animaciones originales del juego.
-- Cambio de color de las piezas según el nivel actual.
-- Posibilidad de guardar la partida y retomarla posteriormente, incluso tras regresar al menú.
-- Detección de récords: al finalizar la partida, el programa muestra si el puntaje obtenido es el nuevo máximo registrado.
+- Cambio de color de las piezas según el nivel actual. (Version PC)
+- Posibilidad de guardar la partida y retomarla posteriormente, incluso tras regresar al menú. (Version PC)
+- Detección de récords: al finalizar la partida, el programa muestra si el puntaje obtenido es el nuevo máximo registrado. (Version PC)
 
 ---
 
