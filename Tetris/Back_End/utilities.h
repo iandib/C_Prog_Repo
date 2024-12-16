@@ -151,4 +151,14 @@ typedef struct
     bool restart;                                 // Flag to restart the game
 } Game;
 
+/* ----------------- GLOBAL VARIABLES (RASPBERRY) ----------------- */
+
+// The following variables are only used for the Raspberry Pi version of the game
+#ifndef PC
+
+extern int digitMatrices[10][8][6];
+extern int menuViews[NUMBER_OF_SLIDES][16][16];
+
+#endif // PC
+
 #endif // UTILITIES_h
