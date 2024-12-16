@@ -83,7 +83,7 @@
 #define JOYSTICK_DELAY 50
 
 char * raspySoundArray [10] = {0};
-char** raspySounds = &raspySoundArray;
+char** raspySounds = raspySoundArray;
 
 #endif
 
