@@ -38,7 +38,7 @@ El programa cumple con todos los requisitos fundamentales del juego **Tetris**:
 
 El proyecto incluye un **Makefile** con una **bandera dinámica** que permite compilar el programa tanto para PC como para Raspberry Pi cambiando únicamente el **target de compilación**.
 
-#### 📌 **Dependencias**
+### 📌 **Dependencias**
 
    **PC (Linux/Windows)**:  
    El juego utiliza la biblioteca **Allegro** para gráficos, fuentes, imágenes y audio. Se debe incluir:
