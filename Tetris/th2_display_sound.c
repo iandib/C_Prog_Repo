@@ -1526,13 +1526,16 @@ static void showNext(Game* game)
 
 static void showLevel(Game* game)
 {
-    dcoord_t coords;
-    coords.x = 11 + game->level % 5; 
-    coords.y = 10 + (int)game->level / 5;
-	//10 and 11 are the coordinates in which the levels are drawn
-
-    disp_write(coords, D_ON);
-    disp_update();
+	int x = 11;
+	int i;
+ 	dcoord_t coords;
+	for(i=1 ; i <= game->level ; ++i)
+	{
+	    	coords.x = x + i % 5;
+	    	coords.y = 10 + i / 5;
+	    	disp_write(coords, D_ON);
+	    	disp_update();
+	}
 }
 
 /*static bool checkPasue()
