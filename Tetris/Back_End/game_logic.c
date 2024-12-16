@@ -214,9 +214,6 @@ void* th1_gamelogic(void* gamep)
 		        game->gameOver = true;
 	            playSoundIndex(GAME_OVER);
 		    }
-
-			// Mark the game for redrawing to update the display
-            game->redraw = true;
 		}
 
         // Handle other game states (menu, pause, or restart)
@@ -267,8 +264,6 @@ void initializeGame(Game* game)
     game->redraw = true;
     game->restart = false;
 
-    // Initialize the leaderboard
-    initialize_leaderboard(game);
 
     /* ------------------ GAME GRID RESET ------------------ */
 
@@ -281,6 +276,12 @@ void initializeGame(Game* game)
             game->tetrominoGrid[i][j] = 0;
         }
     }
+    /* ------------------ GAME SHAPE STATISTICS RESET ------------------ */
+	for (int i = 0; i < NUM_SHAPES; i++)
+	{
+		game->statistics[i] = 0;
+	}
+
 
     /* ------------------ TETROMINO SETUP ------------------ */
 
@@ -368,12 +369,6 @@ void generateNewTetromino(Game* game)
         {
             game->activeTetromino.x = GRID_WIDTH / 2 - 1;
             game->activeTetromino.y = 0;
-        }
-
-        // Initialize the shape statistics array.
-        for (int i = 0; i < NUM_SHAPES; i++) 
-        {
-            game->statistics[i] = 0;
         }
 
         // Set the attributes for the active tetromino.

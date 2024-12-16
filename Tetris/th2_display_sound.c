@@ -80,7 +80,7 @@
 #define FIXED "Sounds/fix.wav"
 
 #define INITIAL_FALL_TIME 40
-#define JOYSTICK_DELAY 50
+#define JOYSTICK_DELAY 80
 
 Audio * raspySoundArray [10];
 //Audio ** raspySounds = &raspySoundArray;
@@ -237,7 +237,6 @@ void * th2_display_sound(void* gamep)
 {
 	Game* game = gamep;
 #ifdef PC
-	bool pressed = false;
 	SPRITES sprites;
 	keys pressed_keys = {0, false, 0, false, 0, false, 0, false};
 	initializeAllegro(game, &sprites);
@@ -269,107 +268,97 @@ void * th2_display_sound(void* gamep)
 		}
 		else if(event.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
-			if(!pressed)
+			if(game->menu)
 			{
-				//pressed = true;
-				if(game->menu)
+				switch(event.keyboard.keycode)
 				{
-					switch(event.keyboard.keycode)
-					{
-						case ALLEGRO_KEY_SPACE:
-							game->menu = false;
-							game->gameOver = false;
-							pressed_keys.key_down_pressed = false;
-							pressed_keys.key_left_pressed = false;
-							pressed_keys.key_right_pressed = false;
-							pressed_keys.key_up_pressed = false;
-							al_start_timer(allegro->fallingTimer);
-							sem_post(&s);
-							break;
-					}
-				}
-				else if(game->pause)
-				{
-					switch(event.keyboard.keycode)
-					{
-						case ALLEGRO_KEY_DOWN:
-							sem_post(&s);
-							game->pause = false;
-							al_resume_timer(allegro->fallingTimer);
-							break;
-
-						case ALLEGRO_KEY_UP:
-							game->restart = true;
-							//game->pause = false;
-							//game->restart = true;
-							//initializeGame(game);
-							//generateNewTetromino(game);
-							//remove("saving.txt");
-							//al_start_timer(allegro->fallingTimer);
-							sem_post(&s);
-
-							break;
-
-						case ALLEGRO_KEY_LEFT: game->menu = true; break;
-
-						case ALLEGRO_KEY_RIGHT: //saveeeeeee
-			            	game->leaderboard[10].score = game->score;
-			            	save_game(game);
-							 break;
-					}
-				}
-				else if(game->gameOver)
-				{
-					switch(event.keyboard.keycode)
-					{
-						case ALLEGRO_KEY_SPACE:
-							//game->menu = true;
-							//game->gameOver = false;
-							game->restart = true;
-							al_stop_timer(allegro->fallingTimer);
-							sem_post(&s);
-							//initializeGame(game);
-							//generateNewTetromino(game);
-							break;
-					}
-				}
-				else
-				{
-					switch(event.keyboard.keycode)
-					{
-						case ALLEGRO_KEY_DOWN:
-							game->activeTetromino.move_down++;
-							pressed_keys.delay_key_down = KEY_DELAY;
-							pressed_keys.key_down_pressed = true;
-							al_stop_timer(allegro->fallingTimer);
+					case ALLEGRO_KEY_SPACE:
+						game->menu = false;
+						game->gameOver = false;
+						pressed_keys.key_down_pressed = false;
+						pressed_keys.key_left_pressed = false;
+						pressed_keys.key_right_pressed = false;
+						pressed_keys.key_up_pressed = false;
+						al_start_timer(allegro->fallingTimer);
+						sem_post(&s);
+						break;
+					case ALLEGRO_KEY_Q:
+						game->quit = true;
 						break;
 
-						case ALLEGRO_KEY_UP:
-							game->activeTetromino.rotate_++;
-							pressed_keys.delay_key_up = KEY_DELAY;
-							pressed_keys.key_up_pressed = true;
+				}
+			}
+			else if(game->pause)
+			{
+				switch(event.keyboard.keycode)
+				{
+					case ALLEGRO_KEY_DOWN:
+						sem_post(&s);
+						game->pause = false;
+						al_resume_timer(allegro->fallingTimer);
 						break;
 
-						case ALLEGRO_KEY_LEFT:
-							game->activeTetromino.move_left++;
-							pressed_keys.delay_key_left = KEY_DELAY;
-							pressed_keys.key_left_pressed = true;
-							break;
+					case ALLEGRO_KEY_UP:
+						game->restart = true;
+						sem_post(&s);
 
-						case ALLEGRO_KEY_RIGHT:
-							game->activeTetromino.move_right++;
-							pressed_keys.delay_key_right = KEY_DELAY;
-							pressed_keys.key_right_pressed = true;
-							break;
+						break;
 
-						case ALLEGRO_KEY_ESCAPE:
-							game->pause = true;
-							al_stop_timer(allegro->fallingTimer);
-							break;
-						case ALLEGRO_KEY_SPACE: game->activeTetromino.move_down += DISPLAY_H; break;
+					case ALLEGRO_KEY_LEFT: game->menu = true; break;
 
-						default: break;
-					}
+					case ALLEGRO_KEY_RIGHT:
+						game->leaderboard[10].score = game->score;
+						save_game(game);
+						 break;
+				}
+			}
+			else if(game->gameOver)
+			{
+				switch(event.keyboard.keycode)
+				{
+					case ALLEGRO_KEY_SPACE:
+						game->restart = true;
+						al_stop_timer(allegro->fallingTimer);
+						sem_post(&s);
+						break;
+				}
+			}
+			else
+			{
+				switch(event.keyboard.keycode)
+				{
+					case ALLEGRO_KEY_DOWN:
+						game->activeTetromino.move_down++;
+						pressed_keys.delay_key_down = KEY_DELAY;
+						pressed_keys.key_down_pressed = true;
+						al_stop_timer(allegro->fallingTimer);
+					break;
+
+					case ALLEGRO_KEY_UP:
+						game->activeTetromino.rotate_++;
+						pressed_keys.delay_key_up = KEY_DELAY;
+						pressed_keys.key_up_pressed = true;
+					break;
+
+					case ALLEGRO_KEY_LEFT:
+						game->activeTetromino.move_left++;
+						pressed_keys.delay_key_left = KEY_DELAY;
+						pressed_keys.key_left_pressed = true;
+						break;
+
+					case ALLEGRO_KEY_RIGHT:
+						game->activeTetromino.move_right++;
+						pressed_keys.delay_key_right = KEY_DELAY;
+						pressed_keys.key_right_pressed = true;
+						break;
+
+					case ALLEGRO_KEY_ESCAPE:
+						game->pause = true;
+						al_stop_timer(allegro->fallingTimer);
+						break;
+					case ALLEGRO_KEY_SPACE: game->activeTetromino.move_down += DISPLAY_H; break;
+
+					default: break;
 				}
 			}
 		}
@@ -466,7 +455,7 @@ void * th2_display_sound(void* gamep)
 			}
 			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
-			   if(game->menu <= NUMBER_OF_SLIDES)
+			   if(game->menu < NUMBER_OF_SLIDES)
 			   {
 					game->menu++;
 					delay_joy.delay_joy_right = JOYSTICK_DELAY;
@@ -1530,13 +1519,16 @@ static void showNext(Game* game)
 
 static void showLevel(Game* game)
 {
-    dcoord_t coords;
-    coords.x = 11 + game->level % 5; 
-    coords.y = 10 + (int)game->level / 5;
-	//10 and 11 are the coordinates in which the levels are drawn
-
-    disp_write(coords, D_ON);
-    disp_update();
+	int x = 11;
+	int i;
+ 	dcoord_t coords;
+	for(i=1 ; i <= game->level ; ++i)
+	{
+	    	coords.x = x + i % 5;
+	    	coords.y = 10 + i / 5;
+	    	disp_write(coords, D_ON);
+	    	disp_update();
+	}
 }
 
 
