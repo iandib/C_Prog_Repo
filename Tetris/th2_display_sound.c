@@ -80,7 +80,7 @@
 #define FIX "fix.wav"
 
 #define INITIAL_FALL_TIME 40
-#define JOYSTICK_DELAY 50
+#define JOYSTICK_DELAY 80
 
 char * raspySoundArray [10] = {0};
 char** raspySounds = raspySoundArray;
