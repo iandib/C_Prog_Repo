@@ -106,9 +106,8 @@ void* th1_gamelogic(void* gamep)
     // Seed the random number generator with the current time
     srand(time(NULL));
 
-    // Initialize the game and leaderboard structures
+    // Initialize the game
 	initializeGame(game);
-	initialize_leaderboard(game);
     
     // Check if a saved game file exists
     if (save != NULL)
@@ -120,7 +119,9 @@ void* th1_gamelogic(void* gamep)
 		game->pause = true;
 
         // Restore the saved game state from the file
+        #ifdef PC
 		recover_game(game);
+        #endif
 	}
 
     else

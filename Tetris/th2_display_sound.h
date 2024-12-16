@@ -3,8 +3,10 @@
 #define _th2_DISPLAY_SOUND_H
 
 void * th2_display_sound(void* gamep);
-void initialize_leaderboard(Game* game);
 void playSoundIndex(int soundIndex);
+
+#ifdef PC
 void recover_game(Game* game);
+#endif
 
 #endif // _th2_DISPLAY_SOUND_H

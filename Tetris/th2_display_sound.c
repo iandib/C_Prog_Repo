@@ -213,11 +213,6 @@ static bool switch_pressed(joyinfo_t* coord);
 
 #endif
 
-static int compare(const void* p1, const void* p2);
-
-void initialize_leaderboard(Game* game);
-static void update_leaderboard(Game* game);
-void recover_game(Game* game);
 void * th2_display_sound(void* game);
 void playSoundIndex(int soundIndex);
 
@@ -597,51 +592,7 @@ void playSoundIndex(int soundIndex)
 	#endif
 }
 
-void initialize_leaderboard(Game* game)
-{
-	FILE *lead = fopen("Menu/leaderboard.txt", "r");
-	if(lead == NULL)
-	{
-		exit(1);
-	}
-	for (int i = 0; i < 10; i++)
-	{									//Puts all highscores into the structures of leaderboard
-		fscanf(lead, "%s", game->leaderboard[i].name);
-		fscanf(lead, "%d", &(game->leaderboard[i].score));
-	}
-	fclose(lead);
-}
-static void update_leaderboard(Game* game)
-{		//NEW HIGHSCOREEEEEEE
-		qsort(game->leaderboard, 10, sizeof(player_t), compare);
-		FILE *leader = fopen("Menu/leaderboard.txt", "w");
-		if(leader == NULL)
-		{
-			exit(1);
-		}
-		for(int i=0; i<10; i++)
-		{
-			fprintf(leader, "%s %u\n", game->leaderboard[i].name, game->leaderboard[i].score);
-		}
-
-		fclose(leader);
-
-}
-
-static int compare(const void* p1, const void* p2)
-{
-	const player_t* pa = p1;
-	const player_t* pb = p2;
-	if(pa->score > pb->score)
-	{
-		return -1;
-	}
-	if(pa->score < pb->score)
-	{
-		return 1;
-	}
-	return 0;
-}
+#ifdef PC
 
 void recover_game(Game* game)
 {
@@ -786,8 +737,6 @@ static void save_game(Game* game)
 	}
 	fclose(save);
 }
-
-#ifdef PC
 
 static void allegroGetTopScore(Game* game)
 {
@@ -1521,15 +1470,19 @@ static void showNext(Game* game)
 
 static void showLevel(Game* game)
 {
-	int x = 11;
-	int i;
- 	dcoord_t coords;
-	for(i=1 ; i <= game->level ; ++i)
+	if(game->level < 40) //max level
 	{
-	    	coords.x = x + i % 5;
-	    	coords.y = 10 + i / 5;
-	    	disp_write(coords, D_ON);
-	    	disp_update();
+		int x = 11;
+		int y = 8;
+		int i;
+		dcoord_t coords;
+		for(i = 0; i <= game->level ; ++i)
+		{
+			coords.x = x + i % 5;
+			coords.y = y + i / 5;
+			disp_write(coords, D_ON);
+		}
+		disp_update();
 	}
 }
 
