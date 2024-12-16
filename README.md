@@ -96,7 +96,7 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
 
 2. En Raspberry Pi ejecutar el archivo compilado con permisos de acceso a hardware:
    ```bash
-   sudo ./tetris_rpi
+   ./tetris_rpi
    ```
 
 ---
