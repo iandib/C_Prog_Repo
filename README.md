@@ -40,8 +40,7 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
 
 ### 📌 **Dependencias**
 
-   **PC (Linux/Windows)**
-   El juego utiliza la biblioteca **Allegro** para gráficos, fuentes, imágenes y audio. Se debe incluir:
+   PC (Linux/Windows) utiliza la biblioteca **Allegro** para gráficos, fuentes, imágenes y audio. Se debe incluir:
    - Allegro Core: `-lallegro`  
    - Primitives: `-lallegro_primitives`  
    - Image Support: `-lallegro_image`  
@@ -50,14 +49,13 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
    - Audio: `-lallegro_audio`  
    - Audio Codecs: `-lallegro_acodec`  
 
-   **Raspberry Pi**
-   El juego dos bibliotecas para manejar el display, los controles y el audio. 
-   - Joydisp Library para el control de la matriz de LEDs:
+   Raspberry Pi utiliza dos bibliotecas para manejar el display, los controles y el audio. 
+   - **Joydisp Library** para el control del joystick:
       ```bash
       ../libs/joydisp/joydrv.o  
       ../libs/joydisp/disdrv.o
       ```  
-   - SDL2 Audio Library para gestionar el sonido:  
+   - **SDL2 Audio Library** para gestionar el sonido:  
       ```bash
       ../libs/audio/SDL2/libAudioSDL2.o
       ``` 
@@ -89,12 +87,12 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
 
 ## 🚀 **Ejecución del Programa**
 
-- En PC (Linux/Windows) ejecutar el archivo compilado:
+En PC (Linux/Windows) ejecutar el archivo compilado:
    ```bash
    ./tetris_pc
    ```
 
-- En Raspberry Pi ejecutar el archivo compilado con permisos de acceso a hardware:
+En Raspberry Pi ejecutar el archivo compilado con permisos de acceso a hardware:
    ```bash
    sudo ./tetris_rpi
    ```
