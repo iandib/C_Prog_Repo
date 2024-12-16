@@ -265,6 +265,7 @@ void * th2_display_sound(void* gamep)
 		{
 			allegroUpdateHud(game);
 			game->quit = true;
+			sem_post(&s);
 		}
 		else if(event.type == ALLEGRO_EVENT_KEY_DOWN)
 		{
@@ -284,6 +285,7 @@ void * th2_display_sound(void* gamep)
 						break;
 					case ALLEGRO_KEY_Q:
 						game->quit = true;
+						sem_post(&s);
 						break;
 
 				}
