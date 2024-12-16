@@ -52,12 +52,12 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
       ```
 
    2. Raspberry Pi utiliza dos bibliotecas para manejar el display, los controles y el audio. 
-   **Joydisp Library** para el control del joystick:
+   - **Joydisp Library** detecta y maneja el joystick:
       ```bash
       ../libs/joydisp/joydrv.o  
       ../libs/joydisp/disdrv.o
       ```  
-   **SDL2 Audio Library** para gestionar el sonido:  
+   - **SDL2 Audio Library** gestiona el sonido:  
       ```bash
       ../libs/audio/SDL2/libAudioSDL2.o
       ``` 
