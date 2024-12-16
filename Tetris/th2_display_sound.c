@@ -77,13 +77,13 @@
 #define MOVE "Sounds/moveSideways.wav"
 #define ROT "Sounds/rotate.wav"
 #define LEVEL "Sounds/tetris.wav"
-#define FIX "Sounds/fix.wav"
+#define FIXED "Sounds/fix.wav"
 
 #define INITIAL_FALL_TIME 40
 #define JOYSTICK_DELAY 50
 
-char * raspySoundArray [10] = {0};
-char** raspySounds = &raspySoundArray;
+Audio * raspySoundArray [10];
+//Audio ** raspySounds = &raspySoundArray;
 
 #endif
 
@@ -586,6 +586,13 @@ void * th2_display_sound(void* gamep)
     	delay_joy.delay_joy_switch > 0 ? delay_joy.delay_joy_switch-- : true;
     }
     endAudio();
+	freeAudio(raspySoundArray[BURN]);
+	freeAudio(raspySoundArray[GAME_OVER]);
+	freeAudio(raspySoundArray[MOVE_SIDEWAYS]);
+	freeAudio(raspySoundArray[TETRIS]);
+	freeAudio(raspySoundArray[ROTATE]);
+	freeAudio(raspySoundArray[VICTORY]);
+	freeAudio(raspySoundArray[FIX]);
 	disp_clear();
 	disp_update();
     pthread_exit(NULL);
@@ -596,7 +603,7 @@ void playSoundIndex(int soundIndex)
 	#ifdef PC
 	al_play_sample(allegro->SFX[soundIndex], 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 	#else
-	playSound(raspySounds[soundIndex], SDL_MIX_MAXVOLUME);
+	playSoundFromMemory(raspySoundArray[soundIndex], SDL_MIX_MAXVOLUME);
 	#endif
 }
 
@@ -1533,31 +1540,19 @@ static void showLevel(Game* game)
     disp_update();
 }
 
-/*static bool checkPasue()
-{
-    joyinfo_t coord = joy_read();
-    if (coord.y > JOY_MAX_POS / 2)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}*/
-
-
 
 static void initializeRaspy()
 {
     joy_init();
     initAudio();
 
-    raspySounds[BURN] = LINE;
-    raspySounds[GAME_OVER] = LOSE;
-    raspySounds[MOVE_SIDEWAYS] = MOVE;
-    raspySounds[TETRIS] = LEVEL;
-    raspySounds[ROTATE] = ROT;
+    raspySoundArray[BURN] = createAudio(LINE,0,SDL_MIX_MAXVOLUME);
+    raspySoundArray[GAME_OVER] = createAudio(LOSE,0,SDL_MIX_MAXVOLUME);
+    raspySoundArray[MOVE_SIDEWAYS] = createAudio(MOVE,0,SDL_MIX_MAXVOLUME);
+    raspySoundArray[TETRIS] = createAudio(LEVEL,0,SDL_MIX_MAXVOLUME);
+    raspySoundArray[ROTATE] = createAudio(ROT,0,SDL_MIX_MAXVOLUME);
+	raspySoundArray[VICTORY] = createAudio(GAME,0,SDL_MIX_MAXVOLUME);
+	raspySoundArray[FIX] = createAudio(FIXED,0,SDL_MIX_MAXVOLUME);
 
     disp_init();
     disp_clear();
