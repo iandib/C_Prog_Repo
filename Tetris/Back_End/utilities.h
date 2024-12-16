@@ -16,8 +16,6 @@
 
 /* ---------------- MACROS & CONSTANTS (UNIVERSAL) ---------------- */
 
-// Flag to indicate if the game is running on a PC
-
 // Number of unique tetromino shapes in the game
 #define NUM_SHAPES 7
 
