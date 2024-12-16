@@ -73,6 +73,7 @@ void * th1_gamelogic(void* gamep)
 				{
 					game->activeTetromino.y++;
 					game->activeTetromino.move_down--;
+					if(game->activeTetromino.move_down < 10)			// In order to avoid any bug that involves the sound played when the tetromino falls, we decided to set a maximum value for game->activeTetromino.move_down so that the program plays that sound with no problem
 					playSoundIndex(MOVE_SIDEWAYS);
 				}
 				else													//If not, that is because we have reached a surface and the program gets ready to fix the tetromino
@@ -169,6 +170,10 @@ void initializeGame(Game* game)											//Sets initial values
 			game->grid[i][j] = 0;
 			game->tetrominoGrid[i][j] = 0;
 		}
+	}
+	for (int i = 0; i < NUM_SHAPES; i++)							//Clears the shape statistics array
+	{
+		game->statistics[i] = 0;
 	}
 	generateNewTetromino(game);
 }
@@ -342,10 +347,7 @@ void generateNewTetromino(Game* game)							// Generates a new random tetromino
             game->activeTetromino.y = 0;
         }
 
-    	for (int i = 0; i < NUM_SHAPES; i++)							//Clears the shape statistics array
-    	{
-    		game->statistics[i] = 0;
-    	}
+
         copyShape(tetrominoShapes[shapeIndex][0], game, true);					//Copies another tetromino shape randomly chosen to the active tetromino shape matrix
         game->activeTetromino.move_down = 0;							//Makes sure that the active tetromino does not go down nor rotates before the game starts 
 	game->activeTetromino.rotate_ = 0;
