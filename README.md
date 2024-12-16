@@ -113,7 +113,10 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
    - Pausa: Tecla `ESC`.
 
 3. Controles en Raspberry Pi:
-   - ???
+   - Joystick hacia arriba: rotar pieza.
+   - Joystick hacia abajo: bajar pieza.
+   - Joystick hacia izquierda o derecha: movimiento horizontal de la pieza.
+   - Joystick pulsado: pausa o accion.
 
 ---
 
