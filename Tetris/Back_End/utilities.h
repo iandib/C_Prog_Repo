@@ -31,9 +31,9 @@
 // Width of the game grid in cells
 #define GRID_WIDTH 10
 
-/* ---------------- MACROS & CONSTANTS (RASPBERRY) ---------------- */
+/* ------------------- MACROS & CONSTANTS (PC) ------------------- */
 
-// The following constants are only used for the Raspberry Pi version of the game
+// The following constants are only used for the PC version of the game
 #ifdef PC
 
 // Delay (in frames) before a piece is fixed in place after hitting the bottom or another block
@@ -48,9 +48,9 @@
 // Height of the game grid in cells (Raspberry Pi version)
 #define GRID_HEIGHT 20
 
-/* ------------------- MACROS & CONSTANTS (PC) ------------------- */
+/* ---------------- MACROS & CONSTANTS (RASPBERRY) ---------------- */
 
-// The following constants are only used for the PC version of the game
+// The following constants are only used for the Raspberry Pi version of the game
 #else
 
 // Delay (in frames) before a piece is fixed in place after hitting the bottom or another block
