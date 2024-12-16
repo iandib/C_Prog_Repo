@@ -2,7 +2,7 @@
 
 Trabajo Práctico Final de la materia **Programación I**, correspondiente al segundo cuatrimestre de la carrera **Ingeniería Electrónica** en el Instituto Tecnológico de Buenos Aires (ITBA).
 
-Este proyecto implementa el juego Tetris, adaptado para ejecutarse tanto en PC (Windows y Linux) como en Raspberry Pi con una matriz de 16x10 LEDs. Se desarrolló respetando las reglas originales del juego, incorporando funcionalidades adicionales y utilizando una estructura modular organizada en Back-End y Front-End.
+Este proyecto implementa el juego Tetris, adaptado para ejecutarse tanto en PC (Windows y Linux) como en Raspberry Pi con una matriz de 16x16 LEDs. Se desarrolló respetando las reglas originales del juego, incorporando funcionalidades adicionales y utilizando una estructura modular organizada en Back-End y Front-End.
 
 ---
 
