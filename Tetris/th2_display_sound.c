@@ -469,7 +469,7 @@ void * th2_display_sound(void* gamep)
 			}
 			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
-			   if(game->menu <= NUMBER_OF_SLIDES)
+			   if(game->menu < NUMBER_OF_SLIDES)
 			   {
 					game->menu++;
 					delay_joy.delay_joy_right = JOYSTICK_DELAY;
