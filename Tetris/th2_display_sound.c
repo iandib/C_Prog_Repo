@@ -203,8 +203,7 @@ static void raspyShowScore(int score, joyinfo_t* coord);
 static void raspyMenu(int[16][16]);
 
 extern int digitMatrices[10][8][6];
-extern int menuMatrices[4][8][8];
-extern int menuViews[4][16][16];
+extern int menuViews[NUMBER_OF_SLIDES][16][16];
 
 static bool movedLeft(joyinfo_t* coord);
 static bool movedRight(joyinfo_t* coord);
