@@ -4,9 +4,7 @@ Trabajo Práctico Final de la materia **Programación I**, correspondiente al se
 
 Este proyecto implementa el juego Tetris, adaptado para ejecutarse tanto en PC (Windows y Linux) como en Raspberry Pi con una matriz de 16x10 LEDs. Se desarrolló respetando las reglas originales del juego, incorporando funcionalidades adicionales y utilizando una estructura modular organizada en Back-End y Front-End.
 
-
 ---
-
 
 ## 📂 **Estructura del Proyecto**
 
@@ -17,9 +15,7 @@ Este proyecto implementa el juego Tetris, adaptado para ejecutarse tanto en PC (
    Estos archivos gestionan el **Front-End** del juego. Incluyen la visualización de las piezas en la pantalla/matriz LED y la coordinación de sonidos a través de un segundo thread.
    > Estos archivos se encuentran en la carpeta principal del proyecto.
 
-
 ---
-
 
 ## 🎮 **Características del Juego**
 
@@ -36,9 +32,7 @@ El programa cumple con todos los requisitos fundamentales del juego Tetris:
 - Posibilidad de guardar la partida y retomarla posteriormente, incluso tras regresar al menú.
 - Detección de récords: al finalizar la partida, el programa muestra si el puntaje obtenido es el nuevo máximo registrado.
 
-
 ---
-
 
 ## 🛠️ **Compilación del Proyecto**
 
@@ -58,12 +52,12 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
       ```
 
    2. Raspberry Pi utiliza dos bibliotecas para manejar el display, los controles y el audio. 
-   - **Joydisp Library** para el control del joystick:
+   **Joydisp Library** para el control del joystick:
       ```bash
       ../libs/joydisp/joydrv.o  
       ../libs/joydisp/disdrv.o
       ```  
-   - **SDL2 Audio Library** para gestionar el sonido:  
+   **SDL2 Audio Library** para gestionar el sonido:  
       ```bash
       ../libs/audio/SDL2/libAudioSDL2.o
       ``` 
@@ -91,9 +85,7 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
 
    Esto genera un ejecutable llamado `tetris_rpi`, optimizado para la Raspberry Pi.
 
-
 ---
-
 
 ## 🚀 **Ejecución del Programa**
 
@@ -107,9 +99,7 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
    sudo ./tetris_rpi
    ```
 
-
 ---
-
 
 ## 🖥️ **Modo de Uso**
 
@@ -127,16 +117,13 @@ El proyecto incluye un Makefile con una bandera dinámica que permite compilar e
 
 ---
 
-
 ## 📜 **Notas Finales**
 
 - El programa está diseñado para ser portable y ejecutarse en diferentes plataformas sin cambios adicionales en el código fuente.  
 - Gracias a la estructura modular del proyecto y el uso de threads, se logra una separación eficiente entre la lógica del juego y la visualización/sonidos, permitiendo sincronización sin interferencias.  
 - Se implementaron buenas prácticas de programación, con manejo adecuado de memoria y concurrencia mediante semaforización.
 
-
 ---
-
 
 ## ✒️ **Autores**
 
