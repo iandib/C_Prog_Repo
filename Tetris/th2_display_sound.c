@@ -1,18 +1,34 @@
-/*
- * th2_display_sound.c
- *
- *  Created on: Nov 25, 2024
- *      Author: Luchelli, Dib, Moschini, Caorsi
- */
-#include "Back_End/utilities.h"
+/* *****************************************************************
+    *                        INFORMATION                          *
+   ***************************************************************** 
+   
+    * @file game_logic.c
+    * @brief Front-end management for the Tetris game.
+    * @date 25-11-2024
+    * @authors Luchelli, Caorsi, Moschini, Dib
+    
+    This file handles the front-end functionalities of the Tetris 
+    game. It renders the display using a spritesheet and coordinates
+	sound effects through a second thread.
+	The second thread is synchronized with the back-end thread 
+	using semaphores to prevent interference. 
+
+*/
+
+/* *****************************************************************
+    *                     FILE CONFIGURATION                      *
+   ***************************************************************** */
+
+/* --------------------- NECESSARY LIBRARIES --------------------- */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <semaphore.h>
-#include "th2_display_sound.h"
-#include "Back_End/game_logic.h"
 #include <time.h>
 #include <string.h>
 #include <unistd.h>
+
+/* ------------------- NECESSARY LIBRARIES (PC) ------------------- */
 
 #ifdef PC
 #include <allegro5/allegro5.h>
@@ -23,12 +39,22 @@
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_image.h>
 
+/* ---------------- NECESSARY LIBRARIES (RASPBERRY) ---------------- */
+
 #else
 #include "../libs/joydisp/disdrv.h"  // Archivo de cabecera del display
 #include "../libs/joydisp/joydrv.h"   // Archivo de cabecera del joystick
 #include "../libs/audio/SDL2/src/audio.h"   // Archivo de cabecera del joystick
 #include <SDL2/SDL.h>
-#endif
+#endif // PC
+
+/* ---------------------- NECESSARY HEADERS ------------------------ */
+
+#include "Back_End/utilities.h"
+#include "th2_display_sound.h"
+#include "Back_End/game_logic.h"
+
+
 
 /*******************************************************************************
  * CONSTANT AND MACRO DEFINITIONS USING #DEFINE
@@ -400,7 +426,6 @@ void * th2_display_sound(void* gamep)
 	        	if(game->leaderboard[10].score > game->leaderboard[9].score)
 	        	{
 	        		allegroDrawHighScore(game->score, game->highScoreIndex);
-	        		update_leaderboard(game);
 	            }
 	        	///////////DRAW LEADERBOARD AND RESTART  //////////////////
 			}
@@ -581,8 +606,13 @@ void * th2_display_sound(void* gamep)
 	disp_clear();
 	disp_update();
     pthread_exit(NULL);
+
 #endif
+
+// Return NULL to satisfy the function's return type
+return NULL;
 }
+
 void playSoundIndex(int soundIndex)
 {
 	#ifdef PC

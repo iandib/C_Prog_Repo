@@ -91,7 +91,7 @@ static void updateLevel(Game* game);
 
 /* Contains the main game logic executed by thread 1.
     @param gamep Pointer to the Game structure containing the game state. */
-void* th1_gamelogic(void* gamep)
+void * th1_gamelogic(void* gamep)
 {
 	/* ------------------- LOCAL VARIABLES ------------------- */
     
@@ -236,6 +236,9 @@ void* th1_gamelogic(void* gamep)
 	
     // Exit the thread once the quit flag is set
     pthread_exit(0);
+
+    // Return NULL to satisfy the function's return type
+    return NULL;
 }
 
 
