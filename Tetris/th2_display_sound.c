@@ -513,7 +513,8 @@ void * th2_display_sound(void* gamep)
 					sem_post(&s);
 				}
 			}
-    	}
+	}
+    }
     	else if(game->pause)
     	{
 			pauseAudio();
