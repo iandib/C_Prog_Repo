@@ -119,9 +119,9 @@ void * th1_gamelogic(void* gamep)
 		game->pause = true;
 
         // Restore the saved game state from the file
-        #ifdef PC
+        
 		recover_game(game);
-        #endif
+      
 	}
 
     else
