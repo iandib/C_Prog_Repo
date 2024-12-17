@@ -261,7 +261,7 @@ void * th2_display_sound(void* gamep)
 #ifdef PC
 	SPRITES sprites;
 	keys pressed_keys = {0, false, 0, false, 0, false, 0, false};
-	while(!game->recoveryChecked);	// Waits for recovery of a saved game to be checked vefore initializing allegro
+	while(!game->recovery_checked);	// Waits for recovery of a saved game to be checked vefore initializing allegro
 	initializeAllegro(game, &sprites);
 	while(!game->quit)
 	{
@@ -1256,7 +1256,7 @@ static void initializeAllegro(Game* game, SPRITES* sprites)								// Initialize
     checkInitialization(al_install_keyboard(), "keyboard");
 
     // Initializes timer
-    allegroInitializeTimer();
+    allegroInitializeTimer(game);
 
     // Creates event queue
     allegroInitializeEventQueue();

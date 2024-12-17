@@ -130,7 +130,7 @@ void * th1_gamelogic(void* gamep)
     	game->menu = PLAY;
 	}
     
-    game->recoveryChecked = true;
+    game->recovery_checked = true;
 	
     /* --------------------- GAME LOOP --------------------- */
     
