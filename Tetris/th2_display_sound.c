@@ -515,7 +515,6 @@ void * th2_display_sound(void* gamep)
 				}
 			}
 	}
-    
     	else if(game->pause)
     	{
 			pauseAudio();
@@ -586,7 +585,8 @@ void * th2_display_sound(void* gamep)
 					delay_joy.delay_joy_switch = JOYSTICK_DELAY;
 					game->pause = false;
 				}
-    	}
+    			}
+	}
     	else if(game->gameOver)
         {
             while (!movedRight(&coord))
