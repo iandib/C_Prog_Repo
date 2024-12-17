@@ -5,8 +5,7 @@
     * @file game_logic.c
     * @brief Game logic functions for the Tetris game
     * @date 25-11-2024
-    * @authors Luchelli, Caorsi
-    * @contributors Moschini, Dib
+    * @authors Luchelli, Caorsi, Moschini, Dib
     
     This file contains the core functions for handling the Tetris 
     game logic, including the management of the game grid, 
