@@ -1210,13 +1210,20 @@ static void allegroDrawStatistics(const Game* game, SPRITES* sprites)						// Dr
     }
 }
 
-static void allegroDrawHighScore(long score, int scoreIndex)				//Draws highscore screen [TO BE CHECKED]
+static void allegroDrawHighScore(long score, int scoreIndex)				
 {
-    const char* scoreString = "NEW HIGHSCORE #  !!!";
+    // Draws the highscore screen at a lower position
+    const char* scoreString = "NEW HIGHSCORE!!!";
+    
+    // Define an offset to move the text down (e.g., 50 pixels)
+    int yOffset = 30;
+
+    // Draw the text with the vertical offset applied
     al_draw_textf(
         allegro->font,
         al_map_rgb_f(1, 1, 1),
-        BUFFER_W / 2, BUFFER_H / 2,
+        BUFFER_W / 2,                      // X coordinate (centered)
+        (BUFFER_H / 2) + yOffset,          // Y coordinate with offset
         ALLEGRO_ALIGN_CENTER,
         "%s",
         scoreString
