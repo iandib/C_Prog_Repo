@@ -146,6 +146,7 @@ void * th1_gamelogic(void* gamep)
 				{
 					game->activeTetromino.y++;
 					game->activeTetromino.move_down--;
+					if(game->activeTetromino.move_down < 10)
 					playSoundIndex(MOVE_SIDEWAYS);
 				}
 
