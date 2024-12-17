@@ -143,7 +143,7 @@ typedef struct
     int levelCheckpoint;                          // Threshold for reaching the next level
     int fixDelay;                                 // Buffer for delaying the bottom row movement
     bool quit;                                    // Flag to indicate if the game should quit
-    bool pause;                                   // Flag to indicate if the game is paused
+    int pause;                                   // Flag to indicate if the game is paused
     bool redraw;                                  // Flag to indicate if the screen needs redrawing
     bool waitingForExit;                          // Flag indicating if the game is waiting for exit
     int menu;                                     // Current menu state
