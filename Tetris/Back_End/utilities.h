@@ -149,6 +149,7 @@ typedef struct
     int menu;                                     // Current menu state
     int statistics[NUM_SHAPES];                   // Count of appearances for each tetromino shape
     bool restart;                                 // Flag to restart the game
+   bool recovery_checked;				              // Flag to initialize allegro if the game has already been recovered
 } Game;
 
 /* ----------------- GLOBAL VARIABLES (RASPBERRY) ----------------- */
