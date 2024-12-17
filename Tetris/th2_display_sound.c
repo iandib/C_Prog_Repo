@@ -515,7 +515,7 @@ void * th2_display_sound(void* gamep)
 				}
 			}
 	}
-    }
+    
     	else if(game->pause)
     	{
 			pauseAudio();
@@ -646,6 +646,7 @@ void * th2_display_sound(void* gamep)
     	delay_joy.delay_joy_up > 0 ? delay_joy.delay_joy_up-- : true;
     	delay_joy.delay_joy_switch > 0 ? delay_joy.delay_joy_switch-- : true;
     }
+ }
     endAudio();
 	freeAudio(raspySoundArray[BURN]);
 	freeAudio(raspySoundArray[GAME_OVER]);
