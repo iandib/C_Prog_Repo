@@ -229,7 +229,7 @@ static void raspyMenu(int[16][16]);
 
 extern int digitMatrices[10][8][6];
 extern int menuViews[NUMBER_OF_SLIDES][16][16];
-extern int pauseViews[5][16][16]
+extern int pauseViews[5][16][16];
 
 static bool movedLeft(joyinfo_t* coord);
 static bool movedRight(joyinfo_t* coord);
