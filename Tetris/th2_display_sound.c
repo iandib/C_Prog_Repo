@@ -202,7 +202,7 @@ static void allegroInitializeSprites(SPRITES* sprites);
 static ALLEGRO_BITMAP* allegroGrabSprite(int x, int y, int w, int h, SPRITES* sprites);
 static void allegroInitializeFonts(void);
 static void allegroInitializeSound(void);
-static void allegroInitializeTimer(void);
+static void allegroInitializeTimer(Game* game);
 static void allegroInitializeEventQueue(void);
 
 static void destroyAllegro(SPRITES* sprites);
@@ -261,12 +261,13 @@ void * th2_display_sound(void* gamep)
 #ifdef PC
 	SPRITES sprites;
 	keys pressed_keys = {0, false, 0, false, 0, false, 0, false};
+	while(!game->recoveryChecked);	// Waits for recovery of a saved game to be checked vefore initializing allegro
 	initializeAllegro(game, &sprites);
 	while(!game->quit)
 	{
         if(game->hasLevelChanged)
         {
-            al_set_timer_speed( allegro->fallingTimer, 1.0 / ((double)game->level*3/4) );
+            al_set_timer_speed( allegro->fallingTimer, 1.0 / ((double)game->level/15 + 1.5) );
             game->hasLevelChanged = false;
         }
 		ALLEGRO_EVENT event;
@@ -324,8 +325,8 @@ void * th2_display_sound(void* gamep)
 
 					case ALLEGRO_KEY_UP:
 						game->restart = true;
+						al_set_timer_speed( allegro->fallingTimer, 1.0 / 1.5  ); //falling timer is reset
 						sem_post(&s);
-
 						break;
 
 					case ALLEGRO_KEY_LEFT: game->menu = true; break;
@@ -1352,12 +1353,12 @@ static void allegroInitializeEventQueue(void)														// Initializes event 
     al_register_event_source(allegro->eventQueue, al_get_keyboard_event_source());
 }
 
-static void allegroInitializeTimer(void)													// Initializes the timers
+static void allegroInitializeTimer(Game* game)										// Initializes the timers
 {
     allegro->displayRedrawTimer = al_create_timer(1.0 / FPS  );					//Display redraw timer
     checkInitialization(allegro->displayRedrawTimer, "displayRedrawTimer");
 
-    allegro->fallingTimer = al_create_timer( 1.0 / 1.0); //CAPAZ ES MUY ALTO		//Falling timer
+    allegro->fallingTimer = al_create_timer( 1.0 / ((double)game->level/10 + 1.5) ); 		//Falling timer
     checkInitialization(allegro->fallingTimer, "fallingTimer");
     // Start timer
     al_start_timer(allegro->displayRedrawTimer);
