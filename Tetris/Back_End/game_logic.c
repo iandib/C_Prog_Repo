@@ -129,7 +129,9 @@ void * th1_gamelogic(void* gamep)
     	// Set the game menu to the "play" state
     	game->menu = PLAY;
 	}
-
+    
+    game->recoveryChecked = true;
+	
     /* --------------------- GAME LOOP --------------------- */
     
     // Continue running the game loop until the quit flag is set
