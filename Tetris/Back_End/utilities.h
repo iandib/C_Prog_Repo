@@ -158,6 +158,7 @@ typedef struct
 
 int digitMatrices[10][8][6];
 int menuViews[NUMBER_OF_SLIDES][16][16];
+int pauseViews[5][16][16]
 
 #endif // PC
 
