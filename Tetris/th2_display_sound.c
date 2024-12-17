@@ -516,25 +516,74 @@ void * th2_display_sound(void* gamep)
     	}
     	else if(game->pause)
     	{
-			if (movedLeft(&coord))
+			pauseAudio();
+			switch(game->pause)
 			{
-				unpauseAudio();
-				sem_post(&s);
-				game->pause = false;
+				/* The number in case corresponds to the index in pauseViews. There an offset of 1 because
+				game->pause needs to be true for the game to stay in the pause screen. */
+				case 1:				
+					raspyMenu(pauseViews[1]);
+					break;
+				case 2:					
+					raspyMenu(pauseViews[2]);
+					break;
+				case 3:
+					raspyMenu(pauseViews[3]);
+					break;
+				case 4:
+					raspyMenu(pauseViews[4]);
+					break;
+				case 5:
+					raspyMenu(pauseViews[5]);
+					break;
+				default: break;
 			}
-			else if (movedRight(&coord))
+			if(movedRight(&coord) && !delay_joy.delay_joy_right)
 			{
-				unpauseAudio();
-				game->pause = false;
-				game->restart = true;
-				sem_post(&s);
+			   if(game->pause < 4)
+			   {
+					game->pause++;
+					delay_joy.delay_joy_right = JOYSTICK_DELAY;
+			   }
 			}
-			else if (movedUp(&coord))
+		
+			if(movedLeft(&coord) && !delay_joy.delay_joy_left)
 			{
-				pauseAudio();
-				game->menu = true;
-				game->pause = false;
+			   if(game->pause > 1)
+			   {
+					game->pause--;
+					delay_joy.delay_joy_left = JOYSTICK_DELAY;
+			   }
 			}
+			if(switch_pressed(&coord) && !delay_joy.delay_joy_switch)
+			{
+				if(game->pause == 1)
+				{
+					save_game(game);
+						delay_joy.delay_joy_switch = JOYSTICK_DELAY;
+				}
+				else if(game->pause == 2)
+				{
+					unpauseAudio();
+					game->pause = false;
+					game->restart = true;
+					delay_joy.delay_joy_switch = JOYSTICK_DELAY;
+					sem_post(&s);
+					
+				}
+				else if(game->pause == 3)
+				{
+					delay_joy.delay_joy_switch = JOYSTICK_DELAY;
+					unpauseAudio();
+					game->pause = false;
+					sem_post(&s);
+				}
+				else if(game->pause == 4)
+				{
+					game->menu = true;
+					delay_joy.delay_joy_switch = JOYSTICK_DELAY;
+					game->pause = false;
+				}
     	}
     	else if(game->gameOver)
         {
