@@ -5,7 +5,7 @@
     * @file shapes.c
     * @brief Defines the tetromino shapes for the Tetris game
     * @date -
-    * @author Luchelli
+    * @author Luchelli, Caorsi, Moschini, Dib
    
     This file contains the definitions for all Tetris tetromino shapes,
     including their rotations, as well as 
