@@ -211,7 +211,6 @@ static void allegroDestroyDisplay(void);
 static void allegroDestroySprites(SPRITES* sprites);
 
 static void checkInitialization(bool test, const char* description);
-static void save_game(Game* game);
 static void press_key_delay(keys* pressed_keys, Game* game);
 
 static ALLEGRO_ELEMENTS allegroElements = { 0 };
@@ -241,6 +240,7 @@ static bool switch_pressed(joyinfo_t* coord);
 
 void * th2_display_sound(void* game);
 void playSoundIndex(int soundIndex);
+static void save_game(Game* game);
 
 extern int tetrominoShapes[NUM_SHAPES][TETROMINO_R][TETROMINO_H][TETROMINO_W];
 extern sem_t s;
@@ -622,8 +622,6 @@ void playSoundIndex(int soundIndex)
 	#endif
 }
 
-#ifdef PC
-
 void recover_game(Game* game)
 {
 	FILE *rescue = fopen("saving.txt", "r");					//Resume an old game
@@ -767,6 +765,9 @@ static void save_game(Game* game)
 	}
 	fclose(save);
 }
+
+#ifdef PC
+
 
 static void allegroGetTopScore(Game* game)
 {
